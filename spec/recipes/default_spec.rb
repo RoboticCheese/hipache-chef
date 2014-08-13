@@ -22,4 +22,8 @@ require 'spec_helper'
 describe 'hipache::default' do
   let(:runner) { ChefSpec::Runner.new }
   let(:chef_run) { runner.converge(described_recipe) }
+
+  it 'installs Node.js' do
+    expect(chef_run).to include_recipe('nodejs')
+  end
 end
