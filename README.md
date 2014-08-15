@@ -6,7 +6,8 @@ Hipache Cookbook
 [cookbook]: https://supermarket.getchef.com/cookbooks/hipache
 [travis]: http://travis-ci.org/RoboticCheese/hipache-chef
 
-A cookbook for installing the Hipache HTTP and websocket proxy.
+A cookbook for installing the [Hipache](https://github.com/hipache/hipache)
+HTTP and websocket proxy.
 
 Requirements
 ============
@@ -29,6 +30,73 @@ Attributes
 
 Resources
 =========
+
+***hipache***
+
+Wraps the installation and configuration of Hipache in a single resource.
+
+Configuration can be offered with a series of attributes:
+
+    hipache 'my_hipache' do
+      access_log: '/path/to/file'
+      workers: 30
+    end
+
+| Attribute             | Default                         |
+|-----------------------|---------------------------------|
+| `access_log`          | `'/var/log/hipache_access.log'` |
+| `workers`             | `10`                            |
+| `max_sockets`         | `100`                           |
+| `dead_backend_ttl`    | `30`                            |
+| `tcp_timeout`         | `30`                            |
+| `retry_on_error`      | `3`                             |
+| `dead_backend_on_500` | `true`                          |
+| `http_keep_alive`     | `false`                         |
+| `https_port`          | `443`                           |
+| `https_bind`          | `['127.0.0.1', '::1']`          |
+| `https_key`           | `'/etc/ssl/ssl.key'`            |
+| `https_cert`          | `'/etc/ssl/ssl.crt'`            |
+| `http_port`           | `80`                            |
+| `http_bind`           | `['127.0.0.1', '::1']`          |
+| `driver`              | `'redis://127.0.0.1:6379'`      |
+
+...or with a configuration hash that represents the entirety of your desired
+configuration (i.e. no default values will be applied for anything else):
+
+    hipache 'my_hipache' do
+      # access_log: '/path/to/file' # Don't set anything else, it'll be ignored
+      config(
+        server: {
+          access_log: '/var/log/hipache_access.log',
+          workers: 10,
+          max_sockets: 100,
+          dead_backend_ttl: 30,
+          tcp_timeout: 30,
+          retry_on_error: 3,
+          dead_backend_on_500: true,
+          http_keep_alive: false
+        },
+        https: {
+          port: 443,
+          bind: ['127.0.0.1', '::1'],
+          key: '/etc/ssl/ssl.key',
+          cert: '/etc/ssl/ssl.crt'
+        },
+        http: {
+          port: 80,
+          bind: ['127.0.0.1', '::1'],
+        },
+        driver: 'redis://127.0.0.1:6379'
+      )
+    end
+
+See the [Hipache](https://github.com/hipache/hipache) documentation for further
+info on all its options.
+
+You might notice that the examples above use underscores in their keys while the
+actual config file generated uses camel-case. This is in keeping with Chef/Ruby
+accepted style, but camel-case keys (e.g. `accessLog` instead of `access_log`)
+are accepted as well.
 
 Providers
 =========
