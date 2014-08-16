@@ -17,3 +17,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+default['hipache']['version'] = nil
+default['hipache']['config_path'] = nil
+
+default['hipache']['access_log'] = nil
+default['hipache']['workers'] = nil
+default['hipache']['max_sockets'] = nil
+default['hipache']['dead_backend_ttl'] = nil
+default['hipache']['tcp_timeout'] = nil
+default['hipache']['retry_on_error'] = nil
+default['hipache']['dead_backend_on_500'] = nil
+default['hipache']['http_keep_alive'] = nil
+
+default['hipache']['https']['port'] = nil
+default['hipache']['https']['bind'] = nil
+default['hipache']['https']['key'] = nil
+default['hipache']['https']['cert'] = nil
+
+default['hipache']['http']['port'] = nil
+default['hipache']['http']['bind'] = nil
+
+default['hipache']['driver'] = nil
+
+default['hipache']['config'] = nil

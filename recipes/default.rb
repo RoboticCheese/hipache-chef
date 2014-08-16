@@ -19,3 +19,35 @@
 #
 
 include_recipe 'nodejs'
+
+hipache 'hipache' do
+  [
+    :version,
+    :config_path,
+
+    :config,
+
+    :access_log,
+    :workers,
+    :max_sockets,
+    :dead_backend_ttl,
+    :tcp_timeout,
+    :retry_on_error,
+    :dead_backend_on_500,
+    :http_keep_alive,
+
+    :driver
+  ].each do |method|
+    send(method, node['hipache'][method]) unless node['hipache'][method].nil?
+  end
+
+  [:port, :bind, :key, :cert].each do |method|
+    next unless node['hipache']['https'][method]
+    send(:"https_#{method}", node['hipache']['https'][method])
+  end
+
+  [:port, :bind].each do |method|
+    next unless node['hipache']['http'][method]
+    send(:"http_#{method}", node['hipache']['http'][method])
+  end
+end

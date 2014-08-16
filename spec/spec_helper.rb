@@ -21,6 +21,8 @@ require 'chef'
 require 'chefspec'
 require 'tmpdir'
 require 'fileutils'
+require_relative '../libraries/hipache_helpers'
+require_relative 'support/matchers/hipache'
 
 RSpec.configure do |c|
   c.color = true

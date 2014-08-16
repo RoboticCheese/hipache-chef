@@ -23,10 +23,16 @@ Recipes
 
 ***default***
 
+Installs Node.js and calls the `hipache` resource (below) to install and
+configure Hipache based on a set of attributes.
+
 Attributes
 ==========
 
 ***default***
+
+Defaults all the possible attributes to be used by the default recipe to nil,
+i.e. use all the resource's defaults (see below).
 
 Resources
 =========
