@@ -23,6 +23,8 @@ require 'tmpdir'
 require 'fileutils'
 require_relative '../libraries/hipache_helpers'
 require_relative 'support/matchers/hipache'
+require_relative 'support/provider/nodejs_npm'
+require_relative 'support/resource/nodejs_npm'
 
 RSpec.configure do |c|
   c.color = true

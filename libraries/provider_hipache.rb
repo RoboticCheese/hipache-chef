@@ -19,6 +19,8 @@
 #
 
 require 'chef/provider'
+require 'chef/resource/template'
+require_relative 'hipache_helpers'
 require_relative 'resource_hipache'
 
 class Chef
@@ -27,6 +29,8 @@ class Chef
     #
     # @author Jonathan Hartman <j@p4nt5.com>
     class Hipache < Provider
+      include ::Hipache::Helpers
+
       #
       # WhyRun is supported by this provider
       #
@@ -43,21 +47,35 @@ class Chef
       #
       def load_current_resource
         @current_resource ||= Resource::Hipache.new(new_resource.name)
-        fail 'Not yet implemented'
       end
 
       #
       # Install the Hipache package
       #
       def action_install
-        fail 'Not yet implemented'
+        package.run_action(:install)
       end
 
       #
       # Uninstall the Hipache package
       #
       def action_uninstall
-        fail 'Not yet implemented'
+        package.run_action(:uninstall)
+      end
+
+      private
+
+      #
+      # The NPM package resource for the Hipache application
+      #
+      # @return [Chef::Resource::NodejsNpm]
+      #
+      def package
+        @package ||= Resource::NodejsNpm.new(app_name, run_context)
+        unless new_resource.version == 'latest'
+          @package.version(new_resource.version)
+        end
+        @package
       end
     end
   end

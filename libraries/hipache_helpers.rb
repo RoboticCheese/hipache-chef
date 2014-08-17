@@ -106,6 +106,15 @@ module Hipache
     }
 
     #
+    # The name of the Hipache application
+    #
+    # @return [String]
+    #
+    def app_name
+      'hipache'
+    end
+
+    #
     # Is this symbol/string a valid version identifier?
     #
     # @param [String, Symbol]
