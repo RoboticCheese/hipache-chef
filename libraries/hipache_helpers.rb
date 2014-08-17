@@ -68,35 +68,39 @@ module Hipache
         default: false,
         alt_name: :httpkeepAlive
       },
-      https_port: {
-        kind_of: Fixnum,
-        default: 443,
-        alt_name: 'https::port'
+      https: {
+        port: {
+          kind_of: Fixnum,
+          default: 443,
+          alt_name: 'port'
+        },
+        bind: {
+          kind_of: [String, Array],
+          default: ['127.0.0.1', '::1'],
+          alt_name: 'bind'
+        },
+        key: {
+          kind_of: String,
+          default: '/etc/ssl/ssl.key',
+          alt_name: 'key'
+        },
+        cert: {
+          kind_of: String,
+          default: '/etc/ssl/ssl.crt',
+          alt_name: 'cert'
+        }
       },
-      https_bind: {
-        kind_of: [String, Array],
-        default: ['127.0.0.1', '::1'],
-        alt_name: 'https::bind'
-      },
-      https_key: {
-        kind_of: String,
-        default: '/etc/ssl/ssl.key',
-        alt_name: 'https::key'
-      },
-      https_cert: {
-        kind_of: String,
-        default: '/etc/ssl/ssl.crt',
-        alt_name: 'https::cert'
-      },
-      http_port: {
-        kind_of: Fixnum,
-        default: 80,
-        alt_name: 'http::port'
-      },
-      http_bind: {
-        kind_of: [String, Array],
-        default: ['127.0.0.1', '::1'],
-        alt_name: 'http::bind'
+      http: {
+        port: {
+          kind_of: Fixnum,
+          default: 80,
+          alt_name: 'port'
+        },
+        bind: {
+          kind_of: [String, Array],
+          default: ['127.0.0.1', '::1'],
+          alt_name: 'bind'
+        }
       },
       driver: {
         kind_of: String,

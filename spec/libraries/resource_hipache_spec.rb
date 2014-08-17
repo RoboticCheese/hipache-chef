@@ -111,19 +111,49 @@ describe Chef::Resource::Hipache do
     end
   end
 
+  describe '#define_attribute_method' do
+    it 'defines a new attribute method' do
+      args = { kind_of: String, default: 'test' }
+      described_class.define_attribute_method(:a_test, args)
+      expect(resource.a_test).to eq('test')
+    end
+  end
+
+  describe '#all_valid_attribute_methods' do
+    options.each do |o|
+      it "returns the #{o} method" do
+        expect(described_class.all_valid_attribute_methods.keys).to include(o)
+      end
+    end
+  end
+
   options.each do |method|
     describe "##{method}" do
       context 'no override provided' do
         it 'returns the default' do
-          expected = Chef::Resource::Hipache::VALID_OPTIONS[method][:default]
+          vopts = Chef::Resource::Hipache::VALID_OPTIONS
+          expected = if vopts[method]
+                       vopts[method][:default]
+                     elsif vopts[:https][method[6..-1].to_sym]
+                       vopts[:https][method[6..-1].to_sym][:default]
+                     elsif vopts[:http][method[5..-1].to_sym]
+                       vopts[:http][method[5..-1].to_sym][:default]
+                     end
           expect(resource.send(method)).to eq(expected)
         end
       end
 
       context 'a valid override provided' do
         let(method) do
-          kinds = Chef::Resource::Hipache::VALID_OPTIONS[method][:kind_of]
-          cls = kinds.is_a?(Array) ? kinds[0] : kinds
+          vopts = Chef::Resource::Hipache::VALID_OPTIONS
+          kind_of = if vopts[method]
+                      vopts[method][:kind_of]
+                    elsif vopts[:https][method[6..-1].to_sym]
+                      vopts[:https][method[6..-1].to_sym][:kind_of]
+                    elsif vopts[:http][method[5..-1].to_sym]
+                      vopts[:http][method[5..-1].to_sym][:kind_of]
+                    end
+          cls = kind_of.is_a?(Array) ? kind_of[0] : kind_of
           case cls.to_s
           when 'String'
             'so-crates'
@@ -150,8 +180,15 @@ describe Chef::Resource::Hipache do
 
       context 'an invalid override provided' do
         let(method) do
-          kinds = Chef::Resource::Hipache::VALID_OPTIONS[method][:kind_of]
-          cls = kinds.is_a?(Array) ? kinds[0] : kinds
+          vopts = Chef::Resource::Hipache::VALID_OPTIONS
+          kind_of = if vopts[method]
+                      vopts[method][:kind_of]
+                    elsif vopts[:https][method[6..-1].to_sym]
+                      vopts[:https][method[6..-1].to_sym][:kind_of]
+                    elsif vopts[:http][method[5..-1].to_sym]
+                      vopts[:http][method[5..-1].to_sym][:kind_of]
+                    end
+          cls = kind_of.is_a?(Array) ? kind_of[0] : kind_of
           case cls.to_s
           when 'String'
             { twenty: 'one' }

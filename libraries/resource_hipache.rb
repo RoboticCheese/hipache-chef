@@ -78,18 +78,33 @@ class Chef
       #
       # Set up a method for each of the valid Hipache config options
       #
-      VALID_OPTIONS.each do |method, attrs|
+      def self.define_attribute_method(method, attrs)
         define_method(method) do |arg = nil|
-          arg.is_a?(String) && attrs[:kind_of] == Fixnum && arg = arg.to_i
-          set_or_return(method,
-                        arg,
-                        kind_of: attrs[:kind_of],
-                        default: attrs[:default],
-                        callbacks: {
-                          "A `config` and `#{method}` can't be used together" =>
-                            ->(a) { a.nil? ? true : config.nil? }
-                        })
+          set_or_return(
+            method,
+            arg.is_a?(String) && attrs[:kind_of] == Fixnum ? arg.to_i : arg,
+            kind_of: attrs[:kind_of],
+            default: attrs[:default],
+            callbacks: { "A `config` and `#{method}` can't be used together" =>
+                           ->(a) { a.nil? ? true : config.nil? } }
+          )
         end
+      end
+
+      def self.all_valid_attribute_methods
+        VALID_OPTIONS.each_with_object({}) do |(k, v), res|
+          res[k] = v unless [:http, :https].include?(k)
+        end
+        .merge(VALID_OPTIONS[:https].each_with_object({}) do |(k, v), res|
+                 res[:"https_#{k}"] = v
+               end)
+        .merge(VALID_OPTIONS[:http].each_with_object({}) do |(k, v), res|
+                 res[:"http_#{k}"] = v
+               end)
+      end
+
+      all_valid_attribute_methods.each do |method, attrs|
+        define_attribute_method(method, attrs)
       end
 
       #
@@ -100,13 +115,10 @@ class Chef
       # @return [Hash, NilClass]
       #
       def config(arg = nil)
-        if arg
-          VALID_OPTIONS.each { |opt, _| instance_variable_set(:"@#{opt}", nil) }
+        arg && self.class.all_valid_attribute_methods.keys.each do |opt|
+          instance_variable_set(:"@#{opt}", nil)
         end
-        set_or_return(:config,
-                      arg,
-                      kind_of: Hash,
-                      default: nil)
+        set_or_return(:config, arg, kind_of: Hash, default: nil)
       end
     end
   end
