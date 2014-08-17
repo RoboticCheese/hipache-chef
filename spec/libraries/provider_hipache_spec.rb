@@ -21,8 +21,34 @@ require_relative '../spec_helper'
 require_relative '../../libraries/provider_hipache'
 
 describe Chef::Provider::Hipache do
-  let(:version) { nil }
-  let(:new_resource) { double(name: 'hipache', version: version) }
+  options = [
+    :version,
+    :access_log,
+    :workers,
+    :max_sockets,
+    :dead_backend_ttl,
+    :tcp_timeout,
+    :retry_on_error,
+    :dead_backend_on_500,
+    :http_keep_alive,
+    :http_port,
+    :http_bind,
+    :https_key,
+    :https_cert,
+    :https_port,
+    :https_bind,
+    :driver
+  ]
+  options.each { |o| let(o) { nil } }
+
+  let(:new_resource) do
+    r = Chef::Resource::Hipache.new('hipache', nil)
+    options.each do |o|
+      r.send(o, send(o)) if send(o)
+    end
+    r
+  end
+
   let(:provider) { described_class.new(new_resource, nil) }
 
   before(:each) do
@@ -87,6 +113,81 @@ describe Chef::Provider::Hipache do
 
       it 'assigns the package the correct version' do
         expect(provider.send(:package).version).to eq('1.2.3')
+      end
+    end
+  end
+
+  describe '#generate_config_hash' do
+    context 'all default attributes' do
+      it 'returns a hash of all the default attributes' do
+        expected = {
+          access_log: '/var/log/hipache_access.log',
+          workers: 10,
+          max_sockets: 100,
+          dead_backend_ttl: 30,
+          tcp_timeout: 30,
+          retry_on_error: 3,
+          dead_backend_on_500: true,
+          http_keep_alive: false,
+          driver: 'redis://127.0.0.1:6379',
+          https: {
+            port: 443,
+            bind: %w(127.0.0.1 ::1),
+            key: '/etc/ssl/ssl.key',
+            cert: '/etc/ssl/ssl.crt'
+          },
+          http: {
+            port: 80,
+            bind: %w(127.0.0.1 ::1)
+          }
+        }
+        expect(provider.send(:generate_config_hash)).to eq(expected)
+      end
+    end
+  end
+
+  describe '#generate_https_hash' do
+    context 'all default attributes' do
+      it 'returns an all default HTTPS hash' do
+        expected = { port: 443,
+                     bind: %w(127.0.0.1 ::1),
+                     key: '/etc/ssl/ssl.key',
+                     cert: '/etc/ssl/ssl.crt' }
+        expect(provider.send(:generate_https_hash)).to eq(expected)
+      end
+    end
+
+    context 'all overridden attributes' do
+      let(:https_port) { 42 }
+      let(:https_bind) { '1.2.3.4' }
+      let(:https_key) { '/tmp/key' }
+      let(:https_cert) { '/tmp/cert' }
+
+      it 'returns the overridden HTTPS hash' do
+        expected = { port: https_port,
+                     bind: https_bind,
+                     key: https_key,
+                     cert: https_cert }
+        expect(provider.send(:generate_https_hash)).to eq(expected)
+      end
+    end
+  end
+
+  describe '#generate_http_hash' do
+    context 'all default attributes' do
+      it 'returns an all default HTTP hash' do
+        expected = { port: 80, bind: %w(127.0.0.1 ::1) }
+        expect(provider.send(:generate_http_hash)).to eq(expected)
+      end
+    end
+
+    context 'all overridden attributes' do
+      let(:http_port) { 42 }
+      let(:http_bind) { '1.2.3.4' }
+
+      it 'returns the overridden HTTP hash' do
+        expected = { port: http_port, bind: http_bind }
+        expect(provider.send(:generate_http_hash)).to eq(expected)
       end
     end
   end

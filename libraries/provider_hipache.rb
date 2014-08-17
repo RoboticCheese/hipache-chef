@@ -18,8 +18,9 @@
 # limitations under the License.
 #
 
+require 'json'
 require 'chef/provider'
-require 'chef/resource/template'
+require 'chef/resource/file'
 require_relative 'hipache_helpers'
 require_relative 'resource_hipache'
 
@@ -54,12 +55,20 @@ class Chef
       #
       def action_install
         package.run_action(:install)
+        # config_dir.run_action(:create)
+        # config.run_action(:create)
       end
 
       #
       # Uninstall the Hipache package
       #
       def action_uninstall
+        # config.run_action(:delete)
+        # config_dir.only_if do
+        #   files = ::Dir.new(path).entries.delete_if { |i| %w(. ..).include?(i) }
+        #   files.length == 0
+        # end
+        # config_dir.run_action(:delete)
         package.run_action(:uninstall)
       end
 
@@ -76,6 +85,69 @@ class Chef
           @package.version(new_resource.version)
         end
         @package
+      end
+
+      #
+      # The config file resource
+      #
+      # @return[Chef::Resource::File]
+      #
+      def config
+        @config ||= Resource::Template.new(new_resource.config_path,
+                                           run_context)
+        @config.content(JSON.dump(generate_config_hash))
+        @config
+      end
+
+      #
+      # A resource for the directory in which the config is located
+      #
+      # @return[Chef::Resource::Directory]
+      #
+      def config_dir
+        @config_dir ||= Resource::Directory.new(
+          ::File.dirname(new_resource.config_path), run_context
+        )
+        @config_dir.recursive(true)
+        @config_dir
+      end
+
+      #
+      # Generate a config hash based on the new_resource
+      #
+      # @return [Hash]
+      #
+      def generate_config_hash
+        return new_resource.config if new_resource.config
+        opts = VALID_OPTIONS.keys.select { |k| ![:http, :https].include?(k) }
+        opts.each_with_object({}) do |k, res|
+          res[k] = new_resource.send(k)
+        end.merge(https: generate_https_hash,
+                  http: generate_http_hash)
+      end
+
+      #
+      # Generate just the hash of https options
+      #
+      # @return [Hash]
+      #
+      def generate_https_hash
+        VALID_OPTIONS[:https].keys.each_with_object({}) do |k, res|
+          res[k] = new_resource.send(:"https_#{k}")
+          res
+        end
+      end
+
+      #
+      # Generate just the hash of http options
+      #
+      # @return [Hash]
+      #
+      def generate_http_hash
+        VALID_OPTIONS[:http].keys.each_with_object({}) do |k, res|
+          res[k] = new_resource.send(:"http_#{k}")
+          res
+        end
       end
     end
   end
