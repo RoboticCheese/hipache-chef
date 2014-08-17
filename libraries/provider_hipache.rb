@@ -55,8 +55,8 @@ class Chef
       #
       def action_install
         package.run_action(:install)
-        # config_dir.run_action(:create)
-        # config.run_action(:create)
+        config_dir.run_action(:create)
+        config.run_action(:create)
       end
 
       #
@@ -93,8 +93,9 @@ class Chef
       # @return[Chef::Resource::File]
       #
       def config
-        @config ||= Resource::Template.new(new_resource.config_path,
-                                           run_context)
+        @config ||= Resource::File.new(new_resource.config_path,
+                                       run_context)
+        # TODO: Add a "DO NOT EDIT" header + generate readable JSON
         @config.content(JSON.dump(generate_config_hash))
         @config
       end

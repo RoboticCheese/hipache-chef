@@ -22,6 +22,7 @@ require_relative '../../libraries/provider_hipache'
 
 describe Chef::Provider::Hipache do
   options = [
+    :config_path,
     :version,
     :access_log,
     :workers,
@@ -69,15 +70,29 @@ describe Chef::Provider::Hipache do
   end
 
   describe '#action_install' do
-    let(:package) { double(run_action: true) }
+    [:package, :config_dir, :config].each do |r|
+      let(r) { double(run_action: true) }
+    end
 
     before(:each) do
-      allow_any_instance_of(described_class).to receive(:package)
-        .and_return(package)
+      [:package, :config_dir, :config].each do |r|
+        allow_any_instance_of(described_class).to receive(r)
+          .and_return(send(r))
+      end
     end
 
     it 'installs the Hipache package' do
       expect(package).to receive(:run_action).with(:install)
+      provider.action_install
+    end
+
+    it 'creates the config file parent directory' do
+      expect(config_dir).to receive(:run_action).with(:create)
+      provider.action_install
+    end
+
+    it 'creates the config file' do
+      expect(config).to receive(:run_action).with(:create)
       provider.action_install
     end
   end
@@ -88,6 +103,14 @@ describe Chef::Provider::Hipache do
     before(:each) do
       allow_any_instance_of(described_class).to receive(:package)
         .and_return(package)
+    end
+
+    it 'deletes the config file' do
+      pending
+    end
+
+    it 'deletes the config file parent directory if empty' do
+      pending
     end
 
     it 'uninstalls the Hipache package' do
@@ -114,6 +137,46 @@ describe Chef::Provider::Hipache do
       it 'assigns the package the correct version' do
         expect(provider.send(:package).version).to eq('1.2.3')
       end
+    end
+  end
+
+  describe '#config' do
+    let(:config_path) { '/somewhere/on/the/filesystem' }
+
+    before(:each) do
+      allow_any_instance_of(described_class).to receive(:generate_config_hash)
+        .and_return(pants: 'sometimes', neckties: 'never')
+    end
+
+    it 'returns a File resource instance' do
+      expected = Chef::Resource::File
+      expect(provider.send(:config)).to be_an_instance_of(expected)
+    end
+
+    it 'points to the config file path' do
+      expect(provider.send(:config).path).to eq(config_path)
+    end
+
+    it 'populates that file with our config JSONified' do
+      expected = '{"pants":"sometimes","neckties":"never"}'
+      expect(provider.send(:config).content).to eq(expected)
+    end
+  end
+
+  describe '#config_dir' do
+    let(:config_path) { '/etc/things/hipache' }
+
+    it 'returns a Directory resource instance' do
+      expected = Chef::Resource::Directory
+      expect(provider.send(:config_dir)).to be_an_instance_of(expected)
+    end
+
+    it 'points to the config file parent directory' do
+      expect(provider.send(:config_dir).path).to eq('/etc/things')
+    end
+
+    it 'is set up to be recursive' do
+      expect(provider.send(:config_dir).recursive).to eq(true)
     end
   end
 
