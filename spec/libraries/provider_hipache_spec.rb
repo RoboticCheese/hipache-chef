@@ -241,14 +241,14 @@ describe Chef::Provider::Hipache do
     context 'all default attributes' do
       it 'returns a hash of all the default attributes' do
         expected = {
-          access_log: '/var/log/hipache_access.log',
+          accessLog: '/var/log/hipache_access.log',
           workers: 10,
-          max_sockets: 100,
-          dead_backend_ttl: 30,
-          tcp_timeout: 30,
-          retry_on_error: 3,
-          dead_backend_on_500: true,
-          http_keep_alive: false,
+          maxSockets: 100,
+          deadBackendTTL: 30,
+          tcpTimeout: 30,
+          retryOnError: 3,
+          deadBackendOn500: true,
+          httpKeepAlive: false,
           driver: 'redis://127.0.0.1:6379',
           https: {
             port: 443,

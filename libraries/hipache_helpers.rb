@@ -66,40 +66,40 @@ module Hipache
       http_keep_alive: {
         kind_of: [TrueClass, FalseClass],
         default: false,
-        alt_name: :httpkeepAlive
+        alt_name: :httpKeepAlive
       },
       https: {
         port: {
           kind_of: Fixnum,
           default: 443,
-          alt_name: 'port'
+          alt_name: :port
         },
         bind: {
           kind_of: [String, Array],
           default: ['127.0.0.1', '::1'],
-          alt_name: 'bind'
+          alt_name: :bind
         },
         key: {
           kind_of: String,
           default: '/etc/ssl/ssl.key',
-          alt_name: 'key'
+          alt_name: :key
         },
         cert: {
           kind_of: String,
           default: '/etc/ssl/ssl.crt',
-          alt_name: 'cert'
+          alt_name: :cert
         }
       },
       http: {
         port: {
           kind_of: Fixnum,
           default: 80,
-          alt_name: 'port'
+          alt_name: :port
         },
         bind: {
           kind_of: [String, Array],
           default: ['127.0.0.1', '::1'],
-          alt_name: 'bind'
+          alt_name: :bind
         }
       },
       driver: {

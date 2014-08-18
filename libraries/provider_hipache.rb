@@ -141,9 +141,9 @@ class Chef
       #
       def generate_config_hash
         return new_resource.config if new_resource.config
-        opts = VALID_OPTIONS.keys.select { |k| ![:http, :https].include?(k) }
-        opts.each_with_object({}) do |k, res|
-          res[k] = new_resource.send(k)
+        opts = VALID_OPTIONS.select { |k, _| ![:http, :https].include?(k) }
+        opts.each_with_object({}) do |(k, v), res|
+          res[v[:alt_name]] = new_resource.send(k)
         end.merge(https: generate_https_hash,
                   http: generate_http_hash)
       end
@@ -154,8 +154,8 @@ class Chef
       # @return [Hash]
       #
       def generate_https_hash
-        VALID_OPTIONS[:https].keys.each_with_object({}) do |k, res|
-          res[k] = new_resource.send(:"https_#{k}")
+        VALID_OPTIONS[:https].each_with_object({}) do |(k, v), res|
+          res[v[:alt_name]] = new_resource.send(:"https_#{k}")
           res
         end
       end
@@ -166,8 +166,8 @@ class Chef
       # @return [Hash]
       #
       def generate_http_hash
-        VALID_OPTIONS[:http].keys.each_with_object({}) do |k, res|
-          res[k] = new_resource.send(:"http_#{k}")
+        VALID_OPTIONS[:http].each_with_object({}) do |(k, v), res|
+          res[v[:alt_name]] = new_resource.send(:"http_#{k}")
           res
         end
       end
