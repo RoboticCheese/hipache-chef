@@ -73,14 +73,14 @@ configuration (i.e. no default values will be applied for anything else):
       # access_log: '/path/to/file' # Don't set anything else, it'll be ignored
       config(
         server: {
-          access_log: '/var/log/hipache_access.log',
+          accessLog: '/var/log/hipache_access.log',
           workers: 10,
-          max_sockets: 100,
-          dead_backend_ttl: 30,
-          tcp_timeout: 30,
-          retry_on_error: 3,
-          dead_backend_on_500: true,
-          http_keep_alive: false
+          maxSockets: 100,
+          deadBackendTTL: 30,
+          tcpTimeout: 30,
+          retryOnError: 3,
+          deadBackendOn500: true,
+          httpKeepAlive: false
         },
         https: {
           port: 443,
@@ -98,11 +98,6 @@ configuration (i.e. no default values will be applied for anything else):
 
 See the [Hipache](https://github.com/hipache/hipache) documentation for further
 info on all its options.
-
-You might notice that the examples above use underscores in their keys while the
-actual config file generated uses camel-case. This is in keeping with Chef/Ruby
-accepted style, but camel-case keys (e.g. `accessLog` instead of `access_log`)
-are accepted as well.
 
 Providers
 =========
