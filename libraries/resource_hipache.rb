@@ -20,7 +20,7 @@
 
 require 'chef/resource'
 require_relative 'hipache_helpers'
-require_relative 'provider_hipache'
+require_relative 'provider_hipache_npm'
 
 class Chef
   class Resource
@@ -37,7 +37,7 @@ class Chef
       def initialize(name, run_context = nil)
         super
         @resource_name = :hipache
-        @provider = Chef::Provider::Hipache
+        @provider = Chef::Provider::Hipache::Npm
         @action = [:install, :enable, :start]
         @package_url = nil
         @allowed_actions = [

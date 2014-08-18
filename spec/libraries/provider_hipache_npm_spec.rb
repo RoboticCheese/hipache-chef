@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Spec:: libraries/provider_hipache
+# Spec:: libraries/provider_hipache_npm
 #
 # Copyright (C) 2014, Jonathan Hartman
 #
@@ -18,9 +18,9 @@
 # limitations under the License.
 
 require_relative '../spec_helper'
-require_relative '../../libraries/provider_hipache'
+require_relative '../../libraries/provider_hipache_npm'
 
-describe Chef::Provider::Hipache do
+describe Chef::Provider::Hipache::Npm do
   options = [
     :config_path,
     :version,
