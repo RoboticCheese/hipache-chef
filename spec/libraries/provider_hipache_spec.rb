@@ -103,15 +103,21 @@ describe Chef::Provider::Hipache do
   end
 
   describe '#action_uninstall' do
-    [:package, :init_script, :config_dir, :config].each do |r|
+    [:package, :service, :init_script, :config_dir, :config].each do |r|
       let(r) { double(run_action: true, only_if: true) }
     end
 
     before(:each) do
-      [:package, :init_script, :config_dir, :config].each do |r|
+      [:package, :service, :init_script, :config_dir, :config].each do |r|
         allow_any_instance_of(described_class).to receive(r)
           .and_return(send(r))
       end
+    end
+
+    it 'stops and disables the service' do
+      expect(service).to receive(:run_action).with(:stop)
+      expect(service).to receive(:run_action).with(:disable)
+      provider.action_uninstall
     end
 
     it 'deletes the config file' do
@@ -136,6 +142,22 @@ describe Chef::Provider::Hipache do
     end
   end
 
+  [:enable, :disable, :start, :stop].each do |act|
+    describe "#action_#{act}" do
+      let(:service) { double(run_action: true) }
+
+      before(:each) do
+        allow_any_instance_of(described_class).to receive(:service)
+          .and_return(service)
+      end
+
+      it "#{act}s the service" do
+        expect(service).to receive(:run_action).with(act)
+        provider.send(:"action_#{act}")
+      end
+    end
+  end
+
   describe '#package' do
     it 'returns a NodeJsNpm resource' do
       expected = Chef::Resource::NodejsNpm
@@ -153,6 +175,44 @@ describe Chef::Provider::Hipache do
 
       it 'assigns the package the correct version' do
         expect(provider.send(:package).version).to eq('1.2.3')
+      end
+    end
+  end
+
+  describe '#service' do
+    let(:init_system) { nil }
+
+    before(:each) do
+      allow_any_instance_of(described_class).to receive(:init_system)
+        .and_return(init_system)
+    end
+
+    shared_examples_for 'any init system' do
+      it 'returns a service resource instance' do
+        expected = Chef::Resource::Service
+        expect(provider.send(:service)).to be_an_instance_of(expected)
+      end
+    end
+
+    context 'an Upstart system' do
+      let(:init_system) { :upstart }
+
+      it_behaves_like 'any init system'
+
+      it 'uses the upstart provider' do
+        expected = Chef::Provider::Service::Upstart
+        expect(provider.send(:service).provider).to eq(expected)
+      end
+    end
+
+    context 'a Systemd system' do
+      let(:init_system) { :systemd }
+
+      it_behaves_like 'any init system'
+
+      it 'uses the systemd provider' do
+        expected = Chef::Provider::Service::Systemd
+        expect(provider.send(:service).provider).to eq(expected)
       end
     end
   end

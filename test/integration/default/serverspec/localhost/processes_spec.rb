@@ -25,4 +25,14 @@ describe 'processes' do
       expect(described_class.stdout).to match(/usage: hipache \[options\]/)
     end
   end
+
+  describe service('hipache') do
+    it 'is enabled' do
+      expect(described_class).to be_enabled
+    end
+
+    it 'is running' do
+      expect(described_class).to be_running
+    end
+  end
 end

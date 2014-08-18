@@ -52,9 +52,10 @@ describe Chef::Resource::Hipache do
   end
 
   describe '#initialize' do
-    it 'defaults to the `install` action' do
-      expect(resource.instance_variable_get(:@action)).to eq(:install)
-      expect(resource.action).to eq(:install)
+    it 'defaults to the install + enable + start actions' do
+      expected = [:install, :enable, :start]
+      expect(resource.instance_variable_get(:@action)).to eq(expected)
+      expect(resource.action).to eq(expected)
     end
 
     it 'defaults the state to uninstalled' do

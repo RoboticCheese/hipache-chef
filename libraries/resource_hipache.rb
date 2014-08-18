@@ -38,9 +38,11 @@ class Chef
         super
         @resource_name = :hipache
         @provider = Chef::Provider::Hipache
-        @action = :install
+        @action = [:install, :enable, :start]
         @package_url = nil
-        @allowed_actions = [:install, :uninstall]
+        @allowed_actions = [
+          :install, :uninstall, :enable, :disable, :start, :stop
+        ]
 
         @installed = false
       end

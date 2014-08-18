@@ -21,6 +21,7 @@
 require 'json'
 require 'chef/provider'
 require 'chef/resource/file'
+require 'chef/resource/service'
 require 'chef/resource/template'
 require_relative 'hipache_helpers'
 require_relative 'resource_hipache'
@@ -65,6 +66,8 @@ class Chef
       # Uninstall the Hipache package
       #
       def action_uninstall
+        service.run_action(:stop)
+        service.run_action(:disable)
         config.run_action(:delete)
         config_dir.only_if do
           files = ::Dir.new(path).entries.delete_if { |i| %w(. ..).include?(i) }
@@ -73,6 +76,13 @@ class Chef
         config_dir.run_action(:delete)
         init_script.run_action(:delete)
         package.run_action(:uninstall)
+      end
+
+      #
+      # Define enable/disable/start/stop Hipache service actions
+      #
+      [:enable, :disable, :start, :stop].each do |act|
+        define_method(:"action_#{act}") { service.run_action(act) }
       end
 
       private
@@ -88,6 +98,17 @@ class Chef
           @package.version(new_resource.version)
         end
         @package
+      end
+
+      #
+      # The Hipache service resource
+      #
+      # @return [Chef::Resource::Service]
+      #
+      def service
+        @service ||= Resource::Service.new(app_name, run_context)
+        @service.provider(Provider::Service.const_get(init_system.capitalize))
+        @service
       end
 
       #
