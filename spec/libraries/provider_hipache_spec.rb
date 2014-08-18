@@ -98,19 +98,26 @@ describe Chef::Provider::Hipache do
   end
 
   describe '#action_uninstall' do
-    let(:package) { double(run_action: true) }
+    [:package, :config_dir, :config].each do |r|
+      let(r) { double(run_action: true, only_if: true) }
+    end
 
     before(:each) do
-      allow_any_instance_of(described_class).to receive(:package)
-        .and_return(package)
+      [:package, :config_dir, :config].each do |r|
+        allow_any_instance_of(described_class).to receive(r)
+          .and_return(send(r))
+      end
     end
 
     it 'deletes the config file' do
-      pending
+      expect(config).to receive(:run_action).with(:delete)
+      provider.action_uninstall
     end
 
     it 'deletes the config file parent directory if empty' do
-      pending
+      expect(config_dir).to receive(:only_if)
+      expect(config_dir).to receive(:run_action).with(:delete)
+      provider.action_uninstall
     end
 
     it 'uninstalls the Hipache package' do

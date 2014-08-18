@@ -63,12 +63,12 @@ class Chef
       # Uninstall the Hipache package
       #
       def action_uninstall
-        # config.run_action(:delete)
-        # config_dir.only_if do
-        #   files = ::Dir.new(path).entries.delete_if { |i| %w(. ..).include?(i) }
-        #   files.length == 0
-        # end
-        # config_dir.run_action(:delete)
+        config.run_action(:delete)
+        config_dir.only_if do
+          files = ::Dir.new(path).entries.delete_if { |i| %w(. ..).include?(i) }
+          files.length == 0
+        end
+        config_dir.run_action(:delete)
         package.run_action(:uninstall)
       end
 
