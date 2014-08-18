@@ -24,14 +24,14 @@ describe Chef::Provider::Hipache do
   options = [
     :config_path,
     :version,
-    :access_log,
-    :workers,
-    :max_sockets,
-    :dead_backend_ttl,
-    :tcp_timeout,
-    :retry_on_error,
-    :dead_backend_on_500,
-    :http_keep_alive,
+    :server_access_log,
+    :server_workers,
+    :server_max_sockets,
+    :server_dead_backend_ttl,
+    :server_tcp_timeout,
+    :server_retry_on_error,
+    :server_dead_backend_on_500,
+    :server_http_keep_alive,
     :http_port,
     :http_bind,
     :https_key,
@@ -45,7 +45,7 @@ describe Chef::Provider::Hipache do
   let(:new_resource) do
     r = Chef::Resource::Hipache.new('hipache', nil)
     options.each do |o|
-      r.send(o, send(o)) if send(o)
+      r.send(o, send(o)) unless send(o).nil?
     end
     r
   end
@@ -241,15 +241,16 @@ describe Chef::Provider::Hipache do
     context 'all default attributes' do
       it 'returns a hash of all the default attributes' do
         expected = {
-          accessLog: '/var/log/hipache_access.log',
-          workers: 10,
-          maxSockets: 100,
-          deadBackendTTL: 30,
-          tcpTimeout: 30,
-          retryOnError: 3,
-          deadBackendOn500: true,
-          httpKeepAlive: false,
-          driver: 'redis://127.0.0.1:6379',
+          server: {
+            accessLog: '/var/log/hipache_access.log',
+            workers: 10,
+            maxSockets: 100,
+            deadBackendTTL: 30,
+            tcpTimeout: 30,
+            retryOnError: 3,
+            deadBackendOn500: true,
+            httpKeepAlive: false
+          },
           https: {
             port: 443,
             bind: %w(127.0.0.1 ::1),
@@ -259,9 +260,53 @@ describe Chef::Provider::Hipache do
           http: {
             port: 80,
             bind: %w(127.0.0.1 ::1)
-          }
+          },
+          driver: 'redis://127.0.0.1:6379'
         }
         expect(provider.send(:generate_config_hash)).to eq(expected)
+      end
+    end
+  end
+
+  describe '#generate_server_hash' do
+    context 'all default attributes' do
+      it 'returns an all default server hash' do
+        expected = {
+          accessLog: '/var/log/hipache_access.log',
+          workers: 10,
+          maxSockets: 100,
+          deadBackendTTL: 30,
+          tcpTimeout: 30,
+          retryOnError: 3,
+          deadBackendOn500: true,
+          httpKeepAlive: false
+        }
+        expect(provider.send(:generate_server_hash)).to eq(expected)
+      end
+    end
+
+    context 'all overridden attributes' do
+      let(:server_access_log) { '/tmp/log.log' }
+      let(:server_workers) { 99 }
+      let(:server_max_sockets) { 99 }
+      let(:server_dead_backend_ttl) { 99 }
+      let(:server_tcp_timeout) { 99 }
+      let(:server_retry_on_error) { 99 }
+      let(:server_dead_backend_on_500) { false }
+      let(:server_http_keep_alive) { true }
+
+      it 'returns the overridden server hash' do
+        expected = {
+          accessLog: '/tmp/log.log',
+          workers: 99,
+          maxSockets: 99,
+          deadBackendTTL: 99,
+          tcpTimeout: 99,
+          retryOnError: 99,
+          deadBackendOn500: false,
+          httpKeepAlive: true
+        }
+        expect(provider.send(:generate_server_hash)).to eq(expected)
       end
     end
   end

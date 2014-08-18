@@ -21,14 +21,14 @@
 default['hipache']['version'] = nil
 default['hipache']['config_path'] = nil
 
-default['hipache']['access_log'] = nil
-default['hipache']['workers'] = nil
-default['hipache']['max_sockets'] = nil
-default['hipache']['dead_backend_ttl'] = nil
-default['hipache']['tcp_timeout'] = nil
-default['hipache']['retry_on_error'] = nil
-default['hipache']['dead_backend_on_500'] = nil
-default['hipache']['http_keep_alive'] = nil
+default['hipache']['server']['access_log'] = nil
+default['hipache']['server']['workers'] = nil
+default['hipache']['server']['max_sockets'] = nil
+default['hipache']['server']['dead_backend_ttl'] = nil
+default['hipache']['server']['tcp_timeout'] = nil
+default['hipache']['server']['retry_on_error'] = nil
+default['hipache']['server']['dead_backend_on_500'] = nil
+default['hipache']['server']['http_keep_alive'] = nil
 
 default['hipache']['https']['port'] = nil
 default['hipache']['https']['bind'] = nil

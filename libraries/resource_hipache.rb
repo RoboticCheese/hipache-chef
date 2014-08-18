@@ -92,15 +92,15 @@ class Chef
       end
 
       def self.all_valid_attribute_methods
-        VALID_OPTIONS.each_with_object({}) do |(k, v), res|
-          res[k] = v unless [:http, :https].include?(k)
+        res = VALID_OPTIONS.each_with_object({}) do |(k, v), hsh|
+          hsh[k] = v unless [:server, :http, :https].include?(k)
         end
-        .merge(VALID_OPTIONS[:https].each_with_object({}) do |(k, v), res|
-                 res[:"https_#{k}"] = v
-               end)
-        .merge(VALID_OPTIONS[:http].each_with_object({}) do |(k, v), res|
-                 res[:"http_#{k}"] = v
-               end)
+        [:server, :https, :http].each do |subkey|
+          res.merge!(VALID_OPTIONS[subkey].each_with_object({}) do |(k, v), hsh|
+            hsh[:"#{subkey}_#{k}"] = v
+          end)
+        end
+        res
       end
 
       all_valid_attribute_methods.each do |method, attrs|

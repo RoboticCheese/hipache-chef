@@ -72,7 +72,7 @@ describe 'hipache::default' do
   end
 
   context 'an overridden config hash' do
-    let(:override) { { 'access_log' => '/var/log/log.log' } }
+    let(:override) { { 'server' => { 'access_log' => '/var/log/log.log' } } }
     let(:workers) { nil }
     let(:runner) do
       ChefSpec::Runner.new do |node|
@@ -98,15 +98,16 @@ describe 'hipache::default' do
 
   opts = Hipache::Helpers::VALID_OPTIONS
   flattened = opts.select do |opt, _|
-    ![:https, :http].include?(opt)
+    ![:server, :https, :http].include?(opt)
   end
+  flattened.merge(opts[:server].each_with_object({}) do |(k, v), res|
+                    res[:"server_#{k}"] = v
+                  end)
   flattened.merge(opts[:https].each_with_object({}) do |(k, v), res|
                     res[:"https_#{k}"] = v
-                    res
                   end)
   flattened.merge(opts[:http].each_with_object({}) do |(k, v), res|
                     res[:"http_#{k}"] = v
-                    res
                   end)
   flattened.each do |method, attrs|
     context "a default #{method}" do
@@ -130,11 +131,11 @@ describe 'hipache::default' do
       let(:runner) do
         ChefSpec::Runner.new do |node|
           if method.to_s.start_with?('https')
-            key = method.to_s.split('_')[1..-1].join('_')
-            node.set['hipache']['https'][key] = override
+            node.set['hipache']['https'][method[6..-1].to_sym] = override
           elsif method.to_s.start_with?('http')
-            key = method.to_s.split('_')[1..-1].join('_')
-            node.set['hipache']['http'][key] = override
+            node.set['hipache']['http'][method[5..-1].to_sym] = override
+          elsif method.to_s.start_with?('server')
+            node.set['hipache']['server'][method[7..-1].to_sym] = override
           else
             node.set['hipache'][method] = override
           end

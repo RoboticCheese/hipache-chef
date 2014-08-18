@@ -24,14 +24,14 @@ describe Chef::Resource::Hipache do
   [:version, :config_path, :config].each { |i| let(i) { nil } }
 
   options =  [
-    :access_log,
-    :workers,
-    :max_sockets,
-    :dead_backend_ttl,
-    :tcp_timeout,
-    :retry_on_error,
-    :dead_backend_on_500,
-    :http_keep_alive,
+    :server_access_log,
+    :server_workers,
+    :server_max_sockets,
+    :server_dead_backend_ttl,
+    :server_tcp_timeout,
+    :server_retry_on_error,
+    :server_dead_backend_on_500,
+    :server_http_keep_alive,
     :https_port,
     :https_bind,
     :https_key,
@@ -134,6 +134,8 @@ describe Chef::Resource::Hipache do
           vopts = Chef::Resource::Hipache::VALID_OPTIONS
           expected = if vopts[method]
                        vopts[method][:default]
+                     elsif vopts[:server][method[7..-1].to_sym]
+                       vopts[:server][method[7..-1].to_sym][:default]
                      elsif vopts[:https][method[6..-1].to_sym]
                        vopts[:https][method[6..-1].to_sym][:default]
                      elsif vopts[:http][method[5..-1].to_sym]
@@ -148,6 +150,8 @@ describe Chef::Resource::Hipache do
           vopts = Chef::Resource::Hipache::VALID_OPTIONS
           kind_of = if vopts[method]
                       vopts[method][:kind_of]
+                    elsif vopts[:server][method[7..-1].to_sym]
+                      vopts[:server][method[7..-1].to_sym][:kind_of]
                     elsif vopts[:https][method[6..-1].to_sym]
                       vopts[:https][method[6..-1].to_sym][:kind_of]
                     elsif vopts[:http][method[5..-1].to_sym]
@@ -183,6 +187,8 @@ describe Chef::Resource::Hipache do
           vopts = Chef::Resource::Hipache::VALID_OPTIONS
           kind_of = if vopts[method]
                       vopts[method][:kind_of]
+                    elsif vopts[:server][method[7..-1].to_sym]
+                      vopts[:server][method[7..-1].to_sym][:kind_of]
                     elsif vopts[:https][method[6..-1].to_sym]
                       vopts[:https][method[6..-1].to_sym][:kind_of]
                     elsif vopts[:http][method[5..-1].to_sym]

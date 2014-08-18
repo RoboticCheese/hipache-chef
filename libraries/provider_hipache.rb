@@ -140,12 +140,36 @@ class Chef
       # @return [Hash]
       #
       def generate_config_hash
+        # TODO: This won't translate the key names to camel case; is that
+        # a problem?
         return new_resource.config if new_resource.config
-        opts = VALID_OPTIONS.select { |k, _| ![:http, :https].include?(k) }
-        opts.each_with_object({}) do |(k, v), res|
-          res[v[:alt_name]] = new_resource.send(k)
-        end.merge(https: generate_https_hash,
-                  http: generate_http_hash)
+        generate_top_level_hash.merge(
+          server: generate_server_hash,
+          https: generate_https_hash,
+          http: generate_http_hash
+        )
+      end
+
+      # Generate everything at the top level of a Hipache config
+      #
+      # @return [Hash]
+      #
+      def generate_top_level_hash
+        VALID_OPTIONS.each_with_object({}) do |(k, v), hsh|
+          next if [:server, :http, :https].include?(k)
+          hsh[v[:alt_name]] = new_resource.send(k)
+        end
+      end
+
+      #
+      # Generate just the hash of server options
+      #
+      # @return [Hash]
+      #
+      def generate_server_hash
+        VALID_OPTIONS[:server].each_with_object({}) do |(k, v), hsh|
+          hsh[v[:alt_name]] = new_resource.send(:"server_#{k}")
+        end
       end
 
       #
@@ -154,9 +178,8 @@ class Chef
       # @return [Hash]
       #
       def generate_https_hash
-        VALID_OPTIONS[:https].each_with_object({}) do |(k, v), res|
-          res[v[:alt_name]] = new_resource.send(:"https_#{k}")
-          res
+        VALID_OPTIONS[:https].each_with_object({}) do |(k, v), hsh|
+          hsh[v[:alt_name]] = new_resource.send(:"https_#{k}")
         end
       end
 
@@ -166,9 +189,8 @@ class Chef
       # @return [Hash]
       #
       def generate_http_hash
-        VALID_OPTIONS[:http].each_with_object({}) do |(k, v), res|
-          res[v[:alt_name]] = new_resource.send(:"http_#{k}")
-          res
+        VALID_OPTIONS[:http].each_with_object({}) do |(k, v), hsh|
+          hsh[v[:alt_name]] = new_resource.send(:"http_#{k}")
         end
       end
     end

@@ -21,12 +21,11 @@
 include_recipe 'nodejs'
 
 hipache 'hipache' do
+  [:version, :config_path, :driver, :config].each do |method|
+    send(method, node['hipache'][method]) unless node['hipache'][method].nil?
+  end
+
   [
-    :version,
-    :config_path,
-
-    :config,
-
     :access_log,
     :workers,
     :max_sockets,
@@ -34,11 +33,10 @@ hipache 'hipache' do
     :tcp_timeout,
     :retry_on_error,
     :dead_backend_on_500,
-    :http_keep_alive,
-
-    :driver
+    :http_keep_alive
   ].each do |method|
-    send(method, node['hipache'][method]) unless node['hipache'][method].nil?
+    next unless node['hipache']['server'][method].nil?
+    send(:"server_#{method}", node['hipache'][method])
   end
 
   [:port, :bind, :key, :cert].each do |method|

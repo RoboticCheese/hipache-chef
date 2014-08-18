@@ -28,45 +28,47 @@ module Hipache
     # classes, and default values
     #
     VALID_OPTIONS ||= {
-      access_log: {
-        kind_of: String,
-        default: '/var/log/hipache_access.log',
-        alt_name: :accessLog
-      },
-      workers: {
-        kind_of: Fixnum,
-        default: 10,
-        alt_name: :workers
-      },
-      max_sockets: {
-        kind_of: Fixnum,
-        default: 100,
-        alt_name: :maxSockets
-      },
-      dead_backend_ttl: {
-        kind_of: Fixnum,
-        default: 30,
-        alt_name: :deadBackendTTL
-      },
-      tcp_timeout: {
-        kind_of: Fixnum,
-        default: 30,
-        alt_name: :tcpTimeout
-      },
-      retry_on_error: {
-        kind_of: Fixnum,
-        default: 3,
-        alt_name: :retryOnError
-      },
-      dead_backend_on_500: {
-        kind_of: [TrueClass, FalseClass],
-        default: true,
-        alt_name: :deadBackendOn500
-      },
-      http_keep_alive: {
-        kind_of: [TrueClass, FalseClass],
-        default: false,
-        alt_name: :httpKeepAlive
+      server: {
+        access_log: {
+          kind_of: String,
+          default: '/var/log/hipache_access.log',
+          alt_name: :accessLog
+        },
+        workers: {
+          kind_of: Fixnum,
+          default: 10,
+          alt_name: :workers
+        },
+        max_sockets: {
+          kind_of: Fixnum,
+          default: 100,
+          alt_name: :maxSockets
+        },
+        dead_backend_ttl: {
+          kind_of: Fixnum,
+          default: 30,
+          alt_name: :deadBackendTTL
+        },
+        tcp_timeout: {
+          kind_of: Fixnum,
+          default: 30,
+          alt_name: :tcpTimeout
+        },
+        retry_on_error: {
+          kind_of: Fixnum,
+          default: 3,
+          alt_name: :retryOnError
+        },
+        dead_backend_on_500: {
+          kind_of: [TrueClass, FalseClass],
+          default: true,
+          alt_name: :deadBackendOn500
+        },
+        http_keep_alive: {
+          kind_of: [TrueClass, FalseClass],
+          default: false,
+          alt_name: :httpKeepAlive
+        }
       },
       https: {
         port: {
