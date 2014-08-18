@@ -101,6 +101,7 @@ class Chef
         end
         @init_script ||= Resource::Template.new("/etc/init/#{app_name}.conf",
                                                 run_context)
+        @init_script.cookbook(cookbook_name.to_s)
         @init_script.source("init/#{init_system}.erb")
         @init_script.variables(executable: app_name,
                                conf_file: new_resource.config_path)
