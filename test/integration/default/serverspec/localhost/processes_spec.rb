@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Spec:: serverspec/localhost/packages
+# Spec:: serverspec/localhost/processes
 #
 # Copyright (C) 2014, Jonathan Hartman
 #
@@ -19,16 +19,10 @@
 
 require 'spec_helper'
 
-describe 'packages' do
-  describe package('nodejs') do
-    it 'is installed' do
-      expect(described_class).to be_installed
-    end
-  end
-
-  describe package('npm::hipache') do
-    it 'is installed' do
-      expect(command('npm info hipache')).to return_exit_status(0)
+describe 'processes' do
+  describe command('hipache --help') do
+    it 'is executable' do
+      expect(described_class.stdout).to match(/usage: hipache \[options\]/)
     end
   end
 end
