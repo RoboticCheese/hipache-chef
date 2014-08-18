@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Spec:: provider/hipache
+# Spec:: libraries/provider_hipache
 #
 # Copyright (C) 2014, Jonathan Hartman
 #
@@ -70,12 +70,12 @@ describe Chef::Provider::Hipache do
   end
 
   describe '#action_install' do
-    [:package, :config_dir, :config].each do |r|
+    [:package, :init_script, :config_dir, :config].each do |r|
       let(r) { double(run_action: true) }
     end
 
     before(:each) do
-      [:package, :config_dir, :config].each do |r|
+      [:package, :init_script, :config_dir, :config].each do |r|
         allow_any_instance_of(described_class).to receive(r)
           .and_return(send(r))
       end
@@ -83,6 +83,11 @@ describe Chef::Provider::Hipache do
 
     it 'installs the Hipache package' do
       expect(package).to receive(:run_action).with(:install)
+      provider.action_install
+    end
+
+    it 'creates the init script' do
+      expect(init_script).to receive(:run_action).with(:create)
       provider.action_install
     end
 
@@ -98,12 +103,12 @@ describe Chef::Provider::Hipache do
   end
 
   describe '#action_uninstall' do
-    [:package, :config_dir, :config].each do |r|
+    [:package, :init_script, :config_dir, :config].each do |r|
       let(r) { double(run_action: true, only_if: true) }
     end
 
     before(:each) do
-      [:package, :config_dir, :config].each do |r|
+      [:package, :init_script, :config_dir, :config].each do |r|
         allow_any_instance_of(described_class).to receive(r)
           .and_return(send(r))
       end
@@ -117,6 +122,11 @@ describe Chef::Provider::Hipache do
     it 'deletes the config file parent directory if empty' do
       expect(config_dir).to receive(:only_if)
       expect(config_dir).to receive(:run_action).with(:delete)
+      provider.action_uninstall
+    end
+
+    it 'deletes the init script' do
+      expect(init_script).to receive(:run_action).with(:delete)
       provider.action_uninstall
     end
 
@@ -143,6 +153,46 @@ describe Chef::Provider::Hipache do
 
       it 'assigns the package the correct version' do
         expect(provider.send(:package).version).to eq('1.2.3')
+      end
+    end
+  end
+
+  describe '#init_script' do
+    let(:init_system) { nil }
+
+    before(:each) do
+      allow_any_instance_of(described_class).to receive(:init_system)
+        .and_return(init_system)
+    end
+
+    context 'an Upstart system' do
+      let(:init_system) { :upstart }
+
+      it 'returns a template resource instance' do
+        expected = Chef::Resource::Template
+        expect(provider.send(:init_script)).to be_an_instance_of(expected)
+      end
+
+      it 'uses the correct destination file' do
+        expect(provider.send(:init_script).name).to eq('/etc/init/hipache.conf')
+      end
+
+      it 'uses the correct source file' do
+        expect(provider.send(:init_script).source).to eq('init/upstart.erb')
+      end
+
+      it 'fills in the appropriate info for Hipache' do
+        expected = { executable: 'hipache', conf_file: '/etc/hipache.json' }
+        expect(provider.send(:init_script).variables).to eq(expected)
+      end
+    end
+
+    context 'a systemd system' do
+      let(:init_system) { :systemd }
+
+      it 'raises an error' do
+        expected = Hipache::Exceptions::UnsupportedPlatform
+        expect { provider.send(:init_script) }.to raise_error(expected)
       end
     end
   end

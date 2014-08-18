@@ -9,7 +9,3 @@ version          '0.0.1'
 depends          'nodejs'
 
 supports         'ubuntu'
-supports         'debian'
-supports         'redhat'
-supports         'centos'
-supports         'scientific'

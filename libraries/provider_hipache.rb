@@ -21,6 +21,7 @@
 require 'json'
 require 'chef/provider'
 require 'chef/resource/file'
+require 'chef/resource/template'
 require_relative 'hipache_helpers'
 require_relative 'resource_hipache'
 
@@ -55,6 +56,7 @@ class Chef
       #
       def action_install
         package.run_action(:install)
+        init_script.run_action(:create)
         config_dir.run_action(:create)
         config.run_action(:create)
       end
@@ -69,6 +71,7 @@ class Chef
           files.length == 0
         end
         config_dir.run_action(:delete)
+        init_script.run_action(:delete)
         package.run_action(:uninstall)
       end
 
@@ -85,6 +88,23 @@ class Chef
           @package.version(new_resource.version)
         end
         @package
+      end
+
+      #
+      # A init script template resource
+      #
+      # @return [Chef::Resource::Template]
+      #
+      def init_script
+        unless init_system == :upstart
+          fail(::Hipache::Exceptions::UnsupportedPlatform, :init_script)
+        end
+        @init_script ||= Resource::Template.new("/etc/init/#{app_name}.conf",
+                                                run_context)
+        @init_script.source("init/#{init_system}.erb")
+        @init_script.variables(executable: app_name,
+                               conf_file: new_resource.config_path)
+        @init_script
       end
 
       #

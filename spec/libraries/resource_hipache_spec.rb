@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Spec:: resource/hipache
+# Spec:: libraries/resource_hipache
 #
 # Copyright (C) 2014, Jonathan Hartman
 #

@@ -96,7 +96,19 @@ describe 'hipache::default' do
     end
   end
 
-  Hipache::Helpers::VALID_OPTIONS.each do |method, attrs|
+  opts = Hipache::Helpers::VALID_OPTIONS
+  flattened = opts.select do |opt, _|
+    ![:https, :http].include?(opt)
+  end
+  flattened.merge(opts[:https].each_with_object({}) do |(k, v), res|
+                    res[:"https_#{k}"] = v
+                    res
+                  end)
+  flattened.merge(opts[:http].each_with_object({}) do |(k, v), res|
+                    res[:"http_#{k}"] = v
+                    res
+                  end)
+  flattened.each do |method, attrs|
     context "a default #{method}" do
       it "installs Hipache with the default #{method}" do
         expect(chef_run).to install_hipache('hipache')

@@ -110,6 +110,21 @@ module Hipache
     }
 
     #
+    # Return the init system for use in this platform
+    #
+    # @return [Symbol]
+    #
+    def init_system
+      # TODO: Add other platforms
+      case node['platform']
+      when 'ubuntu'
+        :upstart
+      else
+        fail(Exceptions::UnsupportedPlatform, :init_system)
+      end
+    end
+
+    #
     # The name of the Hipache application
     #
     # @return [String]
@@ -138,6 +153,15 @@ module Hipache
     class MethodNotImplemented < NotImplementedError
       def initialize(method)
         super("Method '#{method}' needs to be implemented")
+      end
+    end
+
+    # A custom exception class for unsupported platforms
+    #
+    # @author Jonathan Hartman <j@p4nt5.com>
+    class UnsupportedPlatform < NotImplementedError
+      def initialize(item)
+        super("Unsupported platform for method '#{item}'")
       end
     end
   end
