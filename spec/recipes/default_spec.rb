@@ -29,7 +29,8 @@ describe 'hipache::default' do
 
   context 'a default version' do
     it 'installs the default version of Hipache' do
-      expect(chef_run).to install_hipache('hipache').with(version: 'latest')
+      expect(chef_run).to install_hipache_application('hipache')
+        .with(version: 'latest')
     end
   end
 
@@ -41,33 +42,34 @@ describe 'hipache::default' do
     end
 
     it 'installs Hipache with the overridden version' do
-      expect(chef_run).to install_hipache('hipache').with(version: '1.2.3')
+      expect(chef_run).to install_hipache_application('hipache')
+        .with(version: '1.2.3')
     end
   end
 
-  context 'a default config_path' do
-    it 'installs Hipache with the default config_path' do
-      expect(chef_run).to install_hipache('hipache')
-        .with(config_path: '/etc/hipache.json')
+  context 'a default config path' do
+    it 'configures Hipache with the default config path' do
+      expect(chef_run).to configure_hipache('hipache')
+        .with(path: '/etc/hipache.json')
     end
   end
 
-  context 'an overridden config_path' do
+  context 'an overridden config path' do
     let(:runner) do
       ChefSpec::Runner.new do |node|
         node.set['hipache']['config_path'] = '/tmp/test.json'
       end
     end
 
-    it 'installs Hipache with the overridden config_path' do
-      expect(chef_run).to install_hipache('hipache')
-        .with(config_path: '/tmp/test.json')
+    it 'configures Hipache with the overridden config path' do
+      expect(chef_run).to configure_hipache('hipache')
+        .with(path: '/tmp/test.json')
     end
   end
 
   context 'a default config hash' do
-    it 'installs Hipache with the default config hash' do
-      expect(chef_run).to install_hipache('hipache').with(config: nil)
+    it 'configures Hipache with the default config hash' do
+      expect(chef_run).to configure_hipache('hipache').with(config: nil)
     end
   end
 
@@ -76,14 +78,15 @@ describe 'hipache::default' do
     let(:workers) { nil }
     let(:runner) do
       ChefSpec::Runner.new do |node|
-        node.set['hipache']['config'] = override
+        node.set['hipache']['config_hash'] = override
         node.set['hipache']['workers'] = workers
       end
     end
 
     context 'no config conflicts' do
-      it 'installs Hipache with the overridden config hash' do
-        expect(chef_run).to install_hipache('hipache').with(config: override)
+      it 'configures Hipache with the overridden config hash' do
+        expect(chef_run).to configure_hipache('hipache')
+          .with(config_hash: override)
       end
     end
 
@@ -111,8 +114,8 @@ describe 'hipache::default' do
                   end)
   flattened.each do |method, attrs|
     context "a default #{method}" do
-      it "installs Hipache with the default #{method}" do
-        expect(chef_run).to install_hipache('hipache')
+      it "configures Hipache with the default #{method}" do
+        expect(chef_run).to configure_hipache('hipache')
           .with(method => attrs[:default])
       end
     end
@@ -142,9 +145,15 @@ describe 'hipache::default' do
         end
       end
 
-      it "installs Hipache with the overridden #{method}" do
-        expect(chef_run).to install_hipache('hipache').with(method => override)
+      it "configure Hipache with the overridden #{method}" do
+        expect(chef_run).to configure_hipache('hipache')
+          .with(method => override)
       end
     end
+  end
+
+  it 'enables and starts the Hipache service' do
+    expect(chef_run).to enable_hipache('hipache')
+    expect(chef_run).to start_hipache('hipache')
   end
 end

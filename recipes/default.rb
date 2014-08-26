@@ -20,11 +20,13 @@
 
 include_recipe 'nodejs'
 
-hipache 'hipache' do
-  [:version, :config_path, :driver, :config].each do |method|
-    send(method, node['hipache'][method]) unless node['hipache'][method].nil?
-  end
+hipache_application 'hipache' do
+  version node['hipache']['version']
+end
 
+hipache_configuration 'hipache' do
+  path node['hipache']['config_path']
+  config_hash node['hipache']['config_hash']
   [
     :access_log,
     :workers,
@@ -35,17 +37,17 @@ hipache 'hipache' do
     :dead_backend_on_500,
     :http_keep_alive
   ].each do |method|
-    next unless node['hipache']['server'][method].nil?
     send(:"server_#{method}", node['hipache'][method])
   end
-
   [:port, :bind, :key, :cert].each do |method|
-    next unless node['hipache']['https'][method]
     send(:"https_#{method}", node['hipache']['https'][method])
   end
 
   [:port, :bind].each do |method|
-    next unless node['hipache']['http'][method]
     send(:"http_#{method}", node['hipache']['http'][method])
   end
+
+  driver node['hipache']['driver']
 end
+
+hipache_service 'hipache'
