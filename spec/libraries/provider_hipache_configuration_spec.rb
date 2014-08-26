@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Spec:: libraries/provider_hipache
+# Spec:: libraries/provider_hipache_configuration
 #
 # Copyright (C) 2014, Jonathan Hartman
 #
@@ -18,12 +18,12 @@
 # limitations under the License.
 
 require_relative '../spec_helper'
-require_relative '../../libraries/provider_hipache'
+require_relative '../../libraries/provider_hipache_configuration'
 
-describe Chef::Provider::Hipache do
+describe Chef::Provider::HipacheConfiguration do
   options = [
-    :config_path,
-    :version,
+    :created,
+    :path,
     :server_access_log,
     :server_workers,
     :server_max_sockets,
@@ -43,7 +43,7 @@ describe Chef::Provider::Hipache do
   options.each { |o| let(o) { nil } }
 
   let(:new_resource) do
-    r = Chef::Resource::Hipache.new('hipache', nil)
+    r = Chef::Resource::HipacheConfiguration.new('hipache', nil)
     options.each do |o|
       r.send(o, send(o)) unless send(o).nil?
     end
@@ -63,202 +63,69 @@ describe Chef::Provider::Hipache do
   end
 
   describe '#load_current_resource' do
-    it 'returns a Hipache resource' do
-      expected = Chef::Resource::Hipache
+    it 'returns a Configuration resource' do
+      expected = Chef::Resource::HipacheConfiguration
       expect(provider.load_current_resource).to be_an_instance_of(expected)
     end
   end
 
-  describe '#action_install' do
-    [:package, :init_script, :config_dir, :config].each do |r|
-      let(r) { double(run_action: true) }
-    end
+  describe '#action_create' do
+    let(:config_file) { double(run_action: true) }
+    let(:config_dir) { double(run_action: true) }
 
     before(:each) do
-      [:package, :init_script, :config_dir, :config].each do |r|
-        allow_any_instance_of(described_class).to receive(r)
-          .and_return(send(r))
-      end
-    end
-
-    it 'installs the Hipache package' do
-      expect(package).to receive(:run_action).with(:install)
-      provider.action_install
-    end
-
-    it 'creates the init script' do
-      expect(init_script).to receive(:run_action).with(:create)
-      provider.action_install
+      allow_any_instance_of(described_class).to receive(:config_file)
+        .and_return(config_file)
+      allow_any_instance_of(described_class).to receive(:config_dir)
+        .and_return(config_dir)
     end
 
     it 'creates the config file parent directory' do
       expect(config_dir).to receive(:run_action).with(:create)
-      provider.action_install
+      provider.action_create
     end
 
     it 'creates the config file' do
-      expect(config).to receive(:run_action).with(:create)
-      provider.action_install
+      expect(config_file).to receive(:run_action).with(:create)
+      provider.action_create
+    end
+
+    it 'sets the resource state to created' do
+      expect(new_resource).to receive(:created=).with(true)
+      provider.action_create
     end
   end
 
-  describe '#action_uninstall' do
-    [:package, :service, :init_script, :config_dir, :config].each do |r|
-      let(r) { double(run_action: true, only_if: true) }
-    end
+  describe '#action_delete' do
+    let(:config_file) { double(run_action: true) }
+    let(:config_dir) { double(run_action: true, only_if: true) }
 
     before(:each) do
-      [:package, :service, :init_script, :config_dir, :config].each do |r|
-        allow_any_instance_of(described_class).to receive(r)
-          .and_return(send(r))
-      end
-    end
-
-    it 'stops and disables the service' do
-      expect(service).to receive(:run_action).with(:stop)
-      expect(service).to receive(:run_action).with(:disable)
-      provider.action_uninstall
+      allow_any_instance_of(described_class).to receive(:config_file)
+        .and_return(config_file)
+      allow_any_instance_of(described_class).to receive(:config_dir)
+        .and_return(config_dir)
     end
 
     it 'deletes the config file' do
-      expect(config).to receive(:run_action).with(:delete)
-      provider.action_uninstall
+      expect(config_file).to receive(:run_action).with(:delete)
+      provider.action_delete
     end
 
     it 'deletes the config file parent directory if empty' do
       expect(config_dir).to receive(:only_if)
       expect(config_dir).to receive(:run_action).with(:delete)
-      provider.action_uninstall
+      provider.action_delete
     end
 
-    it 'deletes the init script' do
-      expect(init_script).to receive(:run_action).with(:delete)
-      provider.action_uninstall
-    end
-
-    it 'uninstalls the Hipache package' do
-      expect(package).to receive(:run_action).with(:uninstall)
-      provider.action_uninstall
+    it 'sets the resource state to deleted' do
+      expect(new_resource).to receive(:created=).with(false)
+      provider.action_delete
     end
   end
 
-  [:enable, :disable, :start, :stop].each do |act|
-    describe "#action_#{act}" do
-      let(:service) { double(run_action: true) }
-
-      before(:each) do
-        allow_any_instance_of(described_class).to receive(:service)
-          .and_return(service)
-      end
-
-      it "#{act}s the service" do
-        expect(service).to receive(:run_action).with(act)
-        provider.send(:"action_#{act}")
-      end
-    end
-  end
-
-  describe '#package' do
-    it 'returns a NodeJsNpm resource' do
-      expected = Chef::Resource::NodejsNpm
-      expect(provider.send(:package)).to be_an_instance_of(expected)
-    end
-
-    context 'no version specified' do
-      it 'assigns the package no version' do
-        expect(provider.send(:package).version).to eq(nil)
-      end
-    end
-
-    context 'a version specified' do
-      let(:version) { '1.2.3' }
-
-      it 'assigns the package the correct version' do
-        expect(provider.send(:package).version).to eq('1.2.3')
-      end
-    end
-  end
-
-  describe '#service' do
-    let(:init_system) { nil }
-
-    before(:each) do
-      allow_any_instance_of(described_class).to receive(:init_system)
-        .and_return(init_system)
-    end
-
-    shared_examples_for 'any init system' do
-      it 'returns a service resource instance' do
-        expected = Chef::Resource::Service
-        expect(provider.send(:service)).to be_an_instance_of(expected)
-      end
-    end
-
-    context 'an Upstart system' do
-      let(:init_system) { :upstart }
-
-      it_behaves_like 'any init system'
-
-      it 'uses the upstart provider' do
-        expected = Chef::Provider::Service::Upstart
-        expect(provider.send(:service).provider).to eq(expected)
-      end
-    end
-
-    context 'a Systemd system' do
-      let(:init_system) { :systemd }
-
-      it_behaves_like 'any init system'
-
-      it 'uses the systemd provider' do
-        expected = Chef::Provider::Service::Systemd
-        expect(provider.send(:service).provider).to eq(expected)
-      end
-    end
-  end
-
-  describe '#init_script' do
-    let(:init_system) { nil }
-
-    before(:each) do
-      allow_any_instance_of(described_class).to receive(:init_system)
-        .and_return(init_system)
-    end
-
-    context 'an Upstart system' do
-      let(:init_system) { :upstart }
-
-      it 'returns a template resource instance' do
-        expected = Chef::Resource::Template
-        expect(provider.send(:init_script)).to be_an_instance_of(expected)
-      end
-
-      it 'uses the correct destination file' do
-        expect(provider.send(:init_script).name).to eq('/etc/init/hipache.conf')
-      end
-
-      it 'uses the correct source file' do
-        expect(provider.send(:init_script).source).to eq('init/upstart.erb')
-      end
-
-      it 'fills in the appropriate info for Hipache' do
-        expected = { executable: 'hipache', conf_file: '/etc/hipache.json' }
-        expect(provider.send(:init_script).variables).to eq(expected)
-      end
-    end
-
-    context 'a systemd system' do
-      let(:init_system) { :systemd }
-
-      it 'raises an error' do
-        expected = Hipache::Exceptions::UnsupportedPlatform
-        expect { provider.send(:init_script) }.to raise_error(expected)
-      end
-    end
-  end
-
-  describe '#config' do
-    let(:config_path) { '/somewhere/on/the/filesystem' }
+  describe '#config_file' do
+    let(:path) { '/somewhere/on/the/filesystem' }
 
     before(:each) do
       allow_any_instance_of(described_class).to receive(:generate_config_hash)
@@ -267,21 +134,21 @@ describe Chef::Provider::Hipache do
 
     it 'returns a File resource instance' do
       expected = Chef::Resource::File
-      expect(provider.send(:config)).to be_an_instance_of(expected)
+      expect(provider.send(:config_file)).to be_an_instance_of(expected)
     end
 
     it 'points to the config file path' do
-      expect(provider.send(:config).path).to eq(config_path)
+      expect(provider.send(:config_file).path).to eq(path)
     end
 
     it 'populates that file with our config JSONified' do
       expected = '{"pants":"sometimes","neckties":"never"}'
-      expect(provider.send(:config).content).to eq(expected)
+      expect(provider.send(:config_file).content).to eq(expected)
     end
   end
 
   describe '#config_dir' do
-    let(:config_path) { '/etc/things/hipache' }
+    let(:path) { '/etc/things/hipache' }
 
     it 'returns a Directory resource instance' do
       expected = Chef::Resource::Directory

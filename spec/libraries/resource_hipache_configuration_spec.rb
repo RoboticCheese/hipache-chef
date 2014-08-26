@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Spec:: libraries/resource_hipache
+# Spec:: libraries/resource_hipache_configuration
 #
 # Copyright (C) 2014, Jonathan Hartman
 #
@@ -18,10 +18,11 @@
 # limitations under the License.
 
 require_relative '../spec_helper'
-require_relative '../../libraries/resource_hipache'
+require_relative '../../libraries/resource_hipache_configuration'
 
-describe Chef::Resource::Hipache do
-  [:version, :config_path, :config].each { |i| let(i) { nil } }
+describe Chef::Resource::HipacheConfiguration do
+  let(:path) { nil }
+  let(:config_hash) { nil }
 
   options =  [
     :server_access_log,
@@ -44,67 +45,41 @@ describe Chef::Resource::Hipache do
 
   let(:resource) do
     r = described_class.new('my_hipache', nil)
-    r.version(version)
-    r.config_path(config_path)
-    r.config(config)
+    r.path(path) unless path.nil?
+    r.config_hash(config_hash) unless config_hash.nil?
     options.each { |o| r.send(o, send(o)) }
     r
   end
 
   describe '#initialize' do
-    it 'defaults to the install + enable + start actions' do
-      expected = [:install, :enable, :start]
-      expect(resource.instance_variable_get(:@action)).to eq(expected)
-      expect(resource.action).to eq(expected)
+    it 'defaults to the create action' do
+      expect(resource.instance_variable_get(:@action)).to eq(:create)
+      expect(resource.action).to eq(:create)
     end
 
-    it 'defaults the state to uninstalled' do
-      expect(resource.instance_variable_get(:@installed)).to eq(false)
-      expect(resource.installed?).to eq(false)
+    it 'defaults the state to not created' do
+      expect(resource.instance_variable_get(:@created)).to eq(false)
+      expect(resource.created?).to eq(false)
     end
   end
 
-  describe '#version' do
+  describe '#path' do
     context 'no override provided' do
-      it 'defaults to the latest version' do
-        expect(resource.version).to eq('latest')
+      it 'returns the default' do
+        expect(resource.path).to eq('/etc/hipache.json')
       end
     end
 
     context 'a valid override provided' do
-      let(:version) { '1.2.3' }
+      let(:path) { '/var/hip' }
 
       it 'returns the overridden value' do
-        expect(resource.version).to eq(version)
+        expect(resource.path).to eq('/var/hip')
       end
     end
 
     context 'an invalid override provided' do
-      let(:version) { '1.2.z' }
-
-      it 'raises an exception' do
-        expect { resource }.to raise_error(Chef::Exceptions::ValidationFailed)
-      end
-    end
-  end
-
-  describe '#config_path' do
-    context 'no override provided' do
-      it 'defaults to "/etc/hipache.json"' do
-        expect(resource.config_path).to eq('/etc/hipache.json')
-      end
-    end
-
-    context 'a valid override provided' do
-      let(:config_path) { '/var/hip' }
-
-      it 'returns the overridden value' do
-        expect(resource.config_path).to eq(config_path)
-      end
-    end
-
-    context 'an invalid override provided' do
-      let(:config_path) { :test }
+      let(:path) { :test }
 
       it 'raises an exception' do
         expect { resource }.to raise_error(Chef::Exceptions::ValidationFailed)
@@ -132,7 +107,7 @@ describe Chef::Resource::Hipache do
     describe "##{method}" do
       context 'no override provided' do
         it 'returns the default' do
-          vopts = Chef::Resource::Hipache::VALID_OPTIONS
+          vopts = described_class::VALID_OPTIONS
           expected = if vopts[method]
                        vopts[method][:default]
                      elsif vopts[:server][method[7..-1].to_sym]
@@ -148,7 +123,7 @@ describe Chef::Resource::Hipache do
 
       context 'a valid override provided' do
         let(method) do
-          vopts = Chef::Resource::Hipache::VALID_OPTIONS
+          vopts = described_class::VALID_OPTIONS
           kind_of = if vopts[method]
                       vopts[method][:kind_of]
                     elsif vopts[:server][method[7..-1].to_sym]
@@ -174,7 +149,7 @@ describe Chef::Resource::Hipache do
         end
 
         context 'an invalid option combo' do
-          let(:config) { { access_log: '/tmp/log.log' } }
+          let(:config_hash) { { access_log: '/tmp/log.log' } }
 
           it 'raises an exception' do
             expected = Chef::Exceptions::ValidationFailed
@@ -185,7 +160,7 @@ describe Chef::Resource::Hipache do
 
       context 'an invalid override provided' do
         let(method) do
-          vopts = Chef::Resource::Hipache::VALID_OPTIONS
+          vopts = described_class::VALID_OPTIONS
           kind_of = if vopts[method]
                       vopts[method][:kind_of]
                     elsif vopts[:server][method[7..-1].to_sym]
@@ -213,18 +188,18 @@ describe Chef::Resource::Hipache do
     end
   end
 
-  describe '#config' do
+  describe '#config_hash' do
     context 'no override provided' do
       it 'returns the default' do
-        expect(resource.config).to eq(nil)
+        expect(resource.config_hash).to eq(nil)
       end
     end
 
     context 'a valid override provided' do
-      let(:config) { { access_log: '/tmp/log.log' } }
+      let(:config_hash) { { access_log: '/tmp/log.log' } }
 
       it 'returns the overridden value' do
-        expect(resource.config).to eq(config)
+        expect(resource.config_hash).to eq(config_hash)
       end
 
       options.each do |opt|
@@ -235,7 +210,7 @@ describe Chef::Resource::Hipache do
     end
 
     context 'an invalid override provided' do
-      let(:config) { :monkeys }
+      let(:config_hash) { :monkeys }
 
       it 'raises an exception' do
         expect { resource }.to raise_error(Chef::Exceptions::ValidationFailed)

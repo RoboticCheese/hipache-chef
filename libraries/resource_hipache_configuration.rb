@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Library:: resource/hipache
+# Library:: resource_hipache_configuration
 #
 # Copyright 2014, Jonathan Hartman
 #
@@ -20,48 +20,27 @@
 
 require 'chef/resource'
 require_relative 'hipache_helpers'
-require_relative 'provider_hipache'
+require_relative 'provider_hipache_configuration'
 
 class Chef
   class Resource
-    # A Chef resource for the Hipache Node.js package
+    # A Chef resource for a Hipache configuration
     #
     # @author Jonathan Hartman <j@p4nt5.com>
-    class Hipache < Resource
+    class HipacheConfiguration < Resource
       include ::Hipache::Helpers
 
-      attr_accessor :installed
-
-      alias_method :installed?, :installed
+      attr_accessor :created
+      alias_method :created?, :created
 
       def initialize(name, run_context = nil)
         super
-        @resource_name = :hipache
-        @provider = Chef::Provider::Hipache
-        @action = [:install, :enable, :start]
-        @package_url = nil
-        @allowed_actions = [
-          :install, :uninstall, :enable, :disable, :start, :stop
-        ]
+        @resource_name = :hipache_configuration
+        @provider = Chef::Provider::HipacheConfiguration
+        @action = :create
+        @allowed_actions = [:create, :delete]
 
-        @installed = false
-      end
-
-      #
-      # The version of Hipache to install
-      #
-      # @param [String, Symbol, NilClass] arg
-      # @return [String]
-      #
-      def version(arg = nil)
-        set_or_return(:version,
-                      arg.nil? ? arg : arg.to_s,
-                      kind_of: String,
-                      default: 'latest',
-                      callbacks: {
-                        "Valid versions are 'latest' or 'x.y.z'" =>
-                          ->(a) { valid_version?(a) }
-                      })
+        @created = false
       end
 
       #
@@ -70,8 +49,8 @@ class Chef
       # @param [String, NilClass]
       # @return [String]
       #
-      def config_path(arg = nil)
-        set_or_return(:config_path,
+      def path(arg = nil)
+        set_or_return(:path,
                       arg,
                       kind_of: String,
                       default: '/etc/hipache.json')
@@ -87,8 +66,8 @@ class Chef
             arg.is_a?(String) && attrs[:kind_of] == Fixnum ? arg.to_i : arg,
             kind_of: attrs[:kind_of],
             default: attrs[:default],
-            callbacks: { "A `config` and `#{method}` can't be used together" =>
-                           ->(a) { a.nil? ? true : config.nil? } }
+            callbacks: { "`config_hash` and `#{method}` used together" =>
+                           ->(a) { a.nil? ? true : config_hash.nil? } }
           )
         end
       end
@@ -97,9 +76,9 @@ class Chef
         res = VALID_OPTIONS.each_with_object({}) do |(k, v), hsh|
           hsh[k] = v unless [:server, :http, :https].include?(k)
         end
-        [:server, :https, :http].each do |subkey|
-          res.merge!(VALID_OPTIONS[subkey].each_with_object({}) do |(k, v), hsh|
-            hsh[:"#{subkey}_#{k}"] = v
+        [:server, :https, :http].each do |sub|
+          res.merge!(VALID_OPTIONS[sub].each_with_object({}) do |(k, v), hsh|
+            hsh[:"#{sub}_#{k}"] = v
           end)
         end
         res
@@ -116,11 +95,11 @@ class Chef
       # @param [Hash]
       # @return [Hash, NilClass]
       #
-      def config(arg = nil)
+      def config_hash(arg = nil)
         arg && self.class.all_valid_attribute_methods.keys.each do |opt|
           instance_variable_set(:"@#{opt}", nil)
         end
-        set_or_return(:config, arg, kind_of: Hash, default: nil)
+        set_or_return(:config_hash, arg, kind_of: Hash, default: nil)
       end
     end
   end

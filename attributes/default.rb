@@ -40,4 +40,4 @@ default['hipache']['http']['bind'] = nil
 
 default['hipache']['driver'] = nil
 
-default['hipache']['config'] = nil
+default['hipache']['config_hash'] = nil

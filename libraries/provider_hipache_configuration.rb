@@ -1,7 +1,7 @@
 # Encoding: UTF-8
 #
 # Cookbook Name:: hipache
-# Library:: provider/hipache
+# Library:: provider_hipache_configuration
 #
 # Copyright 2014, Jonathan Hartman
 #
@@ -21,21 +21,19 @@
 require 'json'
 require 'chef/provider'
 require 'chef/resource/file'
-require 'chef/resource/service'
-require 'chef/resource/template'
 require_relative 'hipache_helpers'
-require_relative 'resource_hipache'
+require_relative 'resource_hipache_configuration'
 
 class Chef
   class Provider
-    # A Chef provider for the Hipache Node.js package
+    # A Chef provider for a Hipache configuration
     #
     # @author Jonathan Hartman <j@p4nt5.com>
-    class Hipache < Provider
+    class HipacheConfiguration < Provider
       include ::Hipache::Helpers
 
       #
-      # WhyRun is supported by this provider
+      # Advertise WhyRun mode support
       #
       # @return [TrueClass, FalseClass]
       #
@@ -46,100 +44,50 @@ class Chef
       #
       # Load and return the current resource
       #
-      # @return [Chef::Resource::Hipache]
+      # @return [Chef::Resource::HipacheConfiguration]
       #
       def load_current_resource
-        @current_resource ||= Resource::Hipache.new(new_resource.name)
+        @current_resource ||= Resource::HipacheConfiguration.new(
+          new_resource.name
+        )
       end
 
       #
-      # Install the Hipache package
+      # Install the Hipache config file
       #
-      def action_install
-        package.run_action(:install)
-        init_script.run_action(:create)
+      def action_create
         config_dir.run_action(:create)
-        config.run_action(:create)
+        config_file.run_action(:create)
+        new_resource.created = true
       end
 
       #
-      # Uninstall the Hipache package
+      # Delete the Hipache config file
       #
-      def action_uninstall
-        service.run_action(:stop)
-        service.run_action(:disable)
-        config.run_action(:delete)
+      def action_delete
+        config_file.run_action(:delete)
         config_dir.only_if do
-          files = ::Dir.new(path).entries.delete_if { |i| %w(. ..).include?(i) }
-          files.length == 0
+          ::Dir.new(path).entries.delete_if do |i|
+            %w(. ..).include?(i)
+          end.length == 0
         end
         config_dir.run_action(:delete)
-        init_script.run_action(:delete)
-        package.run_action(:uninstall)
-      end
-
-      #
-      # Define enable/disable/start/stop Hipache service actions
-      #
-      [:enable, :disable, :start, :stop].each do |act|
-        define_method(:"action_#{act}") { service.run_action(act) }
+        new_resource.created = false
       end
 
       private
-
-      #
-      # The NPM package resource for the Hipache application
-      #
-      # @return [Chef::Resource::NodejsNpm]
-      #
-      def package
-        @package ||= Resource::NodejsNpm.new(app_name, run_context)
-        unless new_resource.version == 'latest'
-          @package.version(new_resource.version)
-        end
-        @package
-      end
-
-      #
-      # The Hipache service resource
-      #
-      # @return [Chef::Resource::Service]
-      #
-      def service
-        @service ||= Resource::Service.new(app_name, run_context)
-        @service.provider(Provider::Service.const_get(init_system.capitalize))
-        @service
-      end
-
-      #
-      # A init script template resource
-      #
-      # @return [Chef::Resource::Template]
-      #
-      def init_script
-        unless init_system == :upstart
-          fail(::Hipache::Exceptions::UnsupportedPlatform, :init_script)
-        end
-        @init_script ||= Resource::Template.new("/etc/init/#{app_name}.conf",
-                                                run_context)
-        @init_script.cookbook(cookbook_name.to_s)
-        @init_script.source("init/#{init_system}.erb")
-        @init_script.variables(executable: app_name,
-                               conf_file: new_resource.config_path)
-        @init_script
-      end
 
       #
       # The config file resource
       #
       # @return[Chef::Resource::File]
       #
-      def config
-        @config ||= Resource::File.new(new_resource.config_path,
-                                       run_context)
+      def config_file
+        @config_file ||= Resource::File.new(new_resource.path,
+                                            run_context)
         # TODO: Add a "DO NOT EDIT" header + generate readable JSON
-        @config.content(JSON.dump(generate_config_hash))
-        @config
+        @config_file.content(JSON.dump(generate_config_hash))
+        @config_file
       end
 
       #
@@ -149,7 +97,7 @@ class Chef
       #
       def config_dir
         @config_dir ||= Resource::Directory.new(
-          ::File.dirname(new_resource.config_path), run_context
+          ::File.dirname(new_resource.path), run_context
         )
         @config_dir.recursive(true)
         @config_dir
@@ -163,7 +111,7 @@ class Chef
       def generate_config_hash
         # TODO: This won't translate the key names to camel case; is that
         # a problem?
-        return new_resource.config if new_resource.config
+        return new_resource.config_hash if new_resource.config_hash
         generate_top_level_hash.merge(
           server: generate_server_hash,
           https: generate_https_hash,
