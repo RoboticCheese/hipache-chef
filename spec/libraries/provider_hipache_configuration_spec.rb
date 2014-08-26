@@ -20,7 +20,7 @@
 require_relative '../spec_helper'
 require_relative '../../libraries/provider_hipache_configuration'
 
-describe Chef::Provider::Hipache::Configuration do
+describe Chef::Provider::HipacheConfiguration do
   options = [
     :created,
     :path,
@@ -43,7 +43,7 @@ describe Chef::Provider::Hipache::Configuration do
   options.each { |o| let(o) { nil } }
 
   let(:new_resource) do
-    r = Chef::Resource::Hipache::Configuration.new('hipache', nil)
+    r = Chef::Resource::HipacheConfiguration.new('hipache', nil)
     options.each do |o|
       r.send(o, send(o)) unless send(o).nil?
     end
@@ -64,7 +64,7 @@ describe Chef::Provider::Hipache::Configuration do
 
   describe '#load_current_resource' do
     it 'returns a Configuration resource' do
-      expected = Chef::Resource::Hipache::Configuration
+      expected = Chef::Resource::HipacheConfiguration
       expect(provider.load_current_resource).to be_an_instance_of(expected)
     end
   end

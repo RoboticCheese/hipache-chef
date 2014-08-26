@@ -25,63 +25,61 @@ require_relative 'resource_hipache_application'
 
 class Chef
   class Provider
-    class Hipache < Provider
-      # A Chef provider for the Hipache application
+    # A Chef provider for the Hipache application
+    #
+    # @author Jonathan Hartman <j@p4nt5.com>
+    class HipacheApplication < Provider
+      include ::Hipache::Helpers
+
       #
-      # @author Jonathan Hartman <j@p4nt5.com>
-      class Application < Provider
-        include ::Hipache::Helpers
+      # Advertise WhyRun mode support
+      #
+      # @return [TrueClass, FalseClass]
+      #
+      def whyrun_supported?
+        true
+      end
 
-        #
-        # Advertise WhyRun mode support
-        #
-        # @return [TrueClass, FalseClass]
-        #
-        def whyrun_supported?
-          true
+      #
+      # Load and return the current resource
+      #
+      # @return [Chef::Resource::HipacheApplication]
+      #
+      def load_current_resource
+        @current_resource ||= Resource::HipacheApplication.new(
+          new_resource.name, run_context
+        )
+      end
+
+      #
+      # Install the Hipache package
+      #
+      def action_install
+        package.run_action(:install)
+        new_resource.installed = true
+      end
+
+      #
+      # Uninstall the Hipache package
+      #
+      def action_uninstall
+        package.run_action(:uninstall)
+        new_resource.installed = false
+      end
+
+      private
+
+      #
+      # The NPM package resource for the Hipache application
+      #
+      # @return [Chef::Resource::NodejsNpm]
+      #
+      def package
+        @package ||= Resource::NodejsNpm.new(app_name, run_context)
+        unless new_resource.version == 'latest'
+          @package.version(new_resource.version)
         end
-
-        #
-        # Load and return the current resource
-        #
-        # @return [Chef::Resource::Hipache::Application]
-        #
-        def load_current_resource
-          @current_resource ||= Resource::Hipache::Application.new(
-            new_resource.name, run_context
-          )
-        end
-
-        #
-        # Install the Hipache package
-        #
-        def action_install
-          package.run_action(:install)
-          new_resource.installed = true
-        end
-
-        #
-        # Uninstall the Hipache package
-        #
-        def action_uninstall
-          package.run_action(:uninstall)
-          new_resource.installed = false
-        end
-
-        private
-
-        #
-        # The NPM package resource for the Hipache application
-        #
-        # @return [Chef::Resource::NodejsNpm]
-        #
-        def package
-          @package ||= Resource::NodejsNpm.new(app_name, run_context)
-          unless new_resource.version == 'latest'
-            @package.version(new_resource.version)
-          end
-          @package
-        end
+        @package
       end
     end
   end

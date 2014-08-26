@@ -25,42 +25,40 @@ require_relative 'provider_hipache_application'
 
 class Chef
   class Resource
-    class Hipache < Resource
-      # A Chef resource for the Hipache application
+    # A Chef resource for the Hipache application
+    #
+    # @author Jonathan Hartman <j@p4nt5.com>
+    class HipacheApplication < Resource
+      include ::Hipache::Helpers
+
+      attr_accessor :installed
+      alias_method :installed?, :installed
+
+      def initialize(name, run_context = nil)
+        super
+        @resource_name = :hipache_application
+        @provider = Chef::Provider::HipacheApplication
+        @action = :install
+        @allowed_actions = [:install, :uninstall]
+
+        @installed = false
+      end
+
       #
-      # @author Jonathan Hartman <j@p4nt5.com>
-      class Application < Resource
-        include ::Hipache::Helpers
-
-        attr_accessor :installed
-        alias_method :installed?, :installed
-
-        def initialize(name, run_context = nil)
-          super
-          @resource_name = :hipache_application
-          @provider = Chef::Provider::Hipache::Application
-          @action = :install
-          @allowed_actions = [:install, :uninstall]
-
-          @installed = false
-        end
-
-        #
-        # The version of Hipache to install
-        #
-        # @param [String, Symbol, NilClass] arg
-        # @return [String]
-        #
-        def version(arg = nil)
-          set_or_return(:version,
-                        arg.nil? ? arg : arg.to_s,
-                        kind_of: String,
-                        default: 'latest',
-                        callbacks: {
-                          "Valid versions are 'latest' or 'x.y.z'" =>
-                            ->(a) { valid_version?(a) }
-                        })
-        end
+      # The version of Hipache to install
+      #
+      # @param [String, Symbol, NilClass] arg
+      # @return [String]
+      #
+      def version(arg = nil)
+        set_or_return(:version,
+                      arg.nil? ? arg : arg.to_s,
+                      kind_of: String,
+                      default: 'latest',
+                      callbacks: {
+                        "Valid versions are 'latest' or 'x.y.z'" =>
+                          ->(a) { valid_version?(a) }
+                      })
       end
     end
   end

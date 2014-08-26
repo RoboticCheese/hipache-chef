@@ -24,58 +24,56 @@ require_relative 'provider_hipache_service'
 
 class Chef
   class Resource
-    class Hipache < Resource
-      # A Chef resource for the Hipache Node.js package
+    # A Chef resource for the Hipache Node.js package
+    #
+    # @author Jonathan Hartman <j@p4nt5.com>
+    class HipacheService < Resource
+      include ::Hipache::Helpers
+
+      attr_accessor :created
+      attr_accessor :enabled
+      attr_accessor :running
+      alias_method :created?, :created
+      alias_method :enabled?, :enabled
+      alias_method :running?, :running
+
+      def initialize(name, run_context = nil)
+        super
+        @resource_name = :hipache_service
+        @provider = Chef::Provider::HipacheService
+        @action = [:create, :enable, :start]
+        @allowed_actions = [
+          :create, :delete, :enable, :disable, :start, :stop
+        ]
+
+        @created, @enabled, @running = false, false, false
+      end
+
       #
-      # @author Jonathan Hartman <j@p4nt5.com>
-      class Service < Resource
-        include ::Hipache::Helpers
+      # Allow overridding of the init system to use for the service
+      #
+      # @param [String, NilClass]
+      # @return [Symbol]
+      #
+      def init_system(arg = nil)
+        set_or_return(:init_system,
+                      arg.nil? ? arg : arg.to_sym,
+                      kind_of: Symbol,
+                      equal_to: [:upstart],
+                      default: :upstart)
+      end
 
-        attr_accessor :created
-        attr_accessor :enabled
-        attr_accessor :running
-        alias_method :created?, :created
-        alias_method :enabled?, :enabled
-        alias_method :running?, :running
-
-        def initialize(name, run_context = nil)
-          super
-          @resource_name = :hipache_service
-          @provider = Chef::Provider::Hipache::Service
-          @action = [:create, :enable, :start]
-          @allowed_actions = [
-            :create, :delete, :enable, :disable, :start, :stop
-          ]
-
-          @created, @enabled, @running = false, false, false
-        end
-
-        #
-        # Allow overridding of the init system to use for the service
-        #
-        # @param [String, NilClass]
-        # @return [Symbol]
-        #
-        def init_system(arg = nil)
-          set_or_return(:init_system,
-                        arg.nil? ? arg : arg.to_sym,
-                        kind_of: Symbol,
-                        equal_to: [:upstart],
-                        default: :upstart)
-        end
-
-        #
-        # A path to the config file so the service can be pointed at it
-        #
-        # @param [String, NilClass]
-        # @return [String]
-        #
-        def config_path(arg = nil)
-          set_or_return(:config_path,
-                        arg,
-                        kind_of: String,
-                        default: '/etc/hipache.json')
-        end
+      #
+      # A path to the config file so the service can be pointed at it
+      #
+      # @param [String, NilClass]
+      # @return [String]
+      #
+      def config_path(arg = nil)
+        set_or_return(:config_path,
+                      arg,
+                      kind_of: String,
+                      default: '/etc/hipache.json')
       end
     end
   end

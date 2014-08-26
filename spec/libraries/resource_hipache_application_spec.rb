@@ -20,7 +20,7 @@
 require_relative '../spec_helper'
 require_relative '../../libraries/resource_hipache_application'
 
-describe Chef::Resource::Hipache::Application do
+describe Chef::Resource::HipacheApplication do
   let(:version) { nil }
 
   let(:resource) do

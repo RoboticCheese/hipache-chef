@@ -20,10 +20,10 @@
 require_relative '../spec_helper'
 require_relative '../../libraries/provider_hipache_service'
 
-describe Chef::Provider::Hipache::Service do
+describe Chef::Provider::HipacheService do
   let(:init_system) { nil }
   let(:new_resource) do
-    r = Chef::Resource::Hipache::Service.new('my_hipache', nil)
+    r = Chef::Resource::HipacheService.new('my_hipache', nil)
     r.init_system(init_system) if init_system
     r
   end
@@ -42,7 +42,7 @@ describe Chef::Provider::Hipache::Service do
 
   describe '#load_current_resource' do
     it 'returns a Service resource' do
-      expected = Chef::Resource::Hipache::Service
+      expected = Chef::Resource::HipacheService
       expect(provider.load_current_resource).to be_an_instance_of(expected)
     end
   end

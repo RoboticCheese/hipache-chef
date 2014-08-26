@@ -20,12 +20,12 @@
 require_relative '../spec_helper'
 require_relative '../../libraries/provider_hipache_application'
 
-describe Chef::Provider::Hipache::Application do
+describe Chef::Provider::HipacheApplication do
   let(:version) { nil }
   let(:installed) { nil }
 
   let(:new_resource) do
-    r = Chef::Resource::Hipache::Application.new('hipache', nil)
+    r = Chef::Resource::HipacheApplication.new('hipache', nil)
     r.version(version) unless version.nil?
     r.installed(installed) unless installed.nil?
     r
@@ -45,7 +45,7 @@ describe Chef::Provider::Hipache::Application do
 
   describe '#load_current_resource' do
     it 'returns an application resource' do
-      expected = Chef::Resource::Hipache::Application
+      expected = Chef::Resource::HipacheApplication
       expect(provider.load_current_resource).to be_an_instance_of(expected)
     end
   end
