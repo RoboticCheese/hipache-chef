@@ -37,19 +37,53 @@ i.e. use all the resource's defaults (see below).
 Resources
 =========
 
-***hipache***
+***hipache_application***
 
-Wraps the installation and configuration of Hipache in a single resource.
+Used to install/uninstall the Hipache application itself.
 
-Configuration can be offered with a series of attributes:
+Syntax:
 
-    hipache 'my_hipache' do
-      server_access_log: '/path/to/file'
-      server_workers: 30
+    hipache_application 'hipache' do
+      version '1.2.3'
     end
+
+Actions:
+
+| Action       | Description                       |
+|--------------|-----------------------------------|
+| `:install`   | Default; installs the application |
+| `:uninstall` | Uninstalls the application        |
+
+Attributes:
+
+| Attribute | Default    |
+|-----------|------------|
+| `version` | `'latest'` |
+
+***hipache_configuration***
+
+Used to parse and write out a Hipache configuration file. Can either be given
+a series of attributes to merge with an internal set of defaults or a
+`config_hash` meant to represent the entirety of your Hipache config file.
+
+Syntax:
+
+    hipache_configuration 'hipache' do
+      path '/etc/hipache/config.json'
+    end
+
+Actions:
+
+| Action    | Description                      |
+|-----------|----------------------------------|
+| `:create` | Default; creates the config file |
+| `:delete` | Deletes the config file          |
+
+Attributes:
 
 | Attribute                    | Default                         |
 |------------------------------|---------------------------------|
+| `path`                       | `'/etc/hipache.json'`           |
 | `server_access_log`          | `'/var/log/hipache_access.log'` |
 | `server_workers`             | `10`                            |
 | `server_max_sockets`         | `100`                           |
@@ -65,39 +99,29 @@ Configuration can be offered with a series of attributes:
 | `http_port`                  | `80`                            |
 | `http_bind`                  | `['127.0.0.1', '::1']`          |
 | `driver`                     | `'redis://127.0.0.1:6379'`      |
+| `config_hash`                | `nil`                           |
 
-...or with a configuration hash that represents the entirety of your desired
-configuration (i.e. no default values will be applied for anything else):
+***hipache_service***
 
-    hipache 'my_hipache' do
-      # access_log: '/path/to/file' # Don't set anything else, it'll be ignored
-      config(
-        server: {
-          accessLog: '/var/log/hipache_access.log',
-          workers: 10,
-          maxSockets: 100,
-          deadBackendTTL: 30,
-          tcpTimeout: 30,
-          retryOnError: 3,
-          deadBackendOn500: true,
-          httpKeepAlive: false
-        },
-        https: {
-          port: 443,
-          bind: ['127.0.0.1', '::1'],
-          key: '/etc/ssl/ssl.key',
-          cert: '/etc/ssl/ssl.crt'
-        },
-        http: {
-          port: 80,
-          bind: ['127.0.0.1', '::1'],
-        },
-        driver: 'redis://127.0.0.1:6379'
-      )
-    end
+Used to manage any init scripts and the Hipache service.
 
-See the [Hipache](https://github.com/hipache/hipache) documentation for further
-info on all its options.
+Actions:
+
+| Action     | Description                               |
+|------------|-------------------------------------------|
+| `:create`  | Default; creates any init files           |
+| `:delete`  | Stops + disables + deletes any init files |
+| `:enable`  | Default; enables the Hipache service      |
+| `:disable` | Disables the Hipache service              |
+| `:start`   | Default; starts the Hipache service       |
+| `:stop`    | Stops the Hipache service                 |
+
+Attributes:
+
+| Attribute     | Default               |
+|---------------|-----------------------|
+| `init_system` | `:upstart`            |
+| `config_path` | `'/etc/hipache.json'` |
 
 Providers
 =========
