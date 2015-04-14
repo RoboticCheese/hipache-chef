@@ -6,7 +6,6 @@ v?.?.? (????-??-??)
 
 v0.1.0 (2014-08-18)
 -------------------
-
 - Initial release!
 - Standard direct install only (i.e. no Docker container installs yet)
 

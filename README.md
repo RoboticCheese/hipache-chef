@@ -1,10 +1,14 @@
 Hipache Cookbook
 ================
-[![Cookbook Version](http://img.shields.io/cookbook/v/hipache.svg)][cookbook]
-[![Build Status](http://img.shields.io/travis/RoboticCheese/hipache-chef.svg)][travis]
+[![Cookbook Version](https://img.shields.io/cookbook/v/hipache.svg)][cookbook]
+[![Build Status](https://img.shields.io/travis/RoboticCheese/hipache-chef.svg)][travis]
+[![Code Climate](https://img.shields.io/codeclimate/github/RoboticCheese/hipache-chef.svg)][codeclimate]
+[![Coverage Status](https://img.shields.io/coveralls/RoboticCheese/hipache-chef.svg)][coveralls]
 
-[cookbook]: https://supermarket.getchef.com/cookbooks/hipache
-[travis]: http://travis-ci.org/RoboticCheese/hipache-chef
+[cookbook]: https://supermarket.chef.io/cookbooks/hipache
+[travis]: https://travis-ci.org/RoboticCheese/hipache-chef
+[codeclimate]: https://codeclimate.com/github/RoboticCheese/hipache-chef
+[coveralls]: https://coveralls.io/r/RoboticCheese/hipache-chef
 
 A cookbook for installing the [Hipache](https://github.com/hipache/hipache)
 HTTP and websocket proxy.
@@ -140,7 +144,7 @@ License & Authors
 =================
 - Author: Jonathan Hartman <j@p4nt5.com>
 
-Copyright 2014, Jonathan Hartman
+Copyright 2014-2015, Jonathan Hartman
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

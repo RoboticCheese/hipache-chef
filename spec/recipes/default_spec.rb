@@ -1,26 +1,9 @@
 # Encoding: UTF-8
-#
-# Cookbook Name:: hipache
-# Spec:: recipes/default
-#
-# Copyright (C) 2014, Jonathan Hartman
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-require 'spec_helper'
+require_relative '../spec_helper'
 
 describe 'hipache::default' do
-  let(:runner) { ChefSpec::Runner.new }
+  let(:runner) { ChefSpec::ServerRunner.new }
   let(:chef_run) { runner.converge(described_recipe) }
 
   it 'installs Node.js' do
@@ -36,7 +19,7 @@ describe 'hipache::default' do
 
   context 'an overridden version' do
     let(:runner) do
-      ChefSpec::Runner.new do |node|
+      ChefSpec::ServerRunner.new do |node|
         node.set['hipache']['version'] = '1.2.3'
       end
     end
@@ -56,7 +39,7 @@ describe 'hipache::default' do
 
   context 'an overridden config path' do
     let(:runner) do
-      ChefSpec::Runner.new do |node|
+      ChefSpec::ServerRunner.new do |node|
         node.set['hipache']['config_path'] = '/tmp/test.json'
       end
     end
@@ -77,7 +60,7 @@ describe 'hipache::default' do
     let(:override) { { 'server' => { 'access_log' => '/var/log/log.log' } } }
     let(:workers) { nil }
     let(:runner) do
-      ChefSpec::Runner.new do |node|
+      ChefSpec::ServerRunner.new do |node|
         node.set['hipache']['config_hash'] = override
         node.set['hipache']['workers'] = workers
       end
@@ -132,7 +115,7 @@ describe 'hipache::default' do
         end
       end
       let(:runner) do
-        ChefSpec::Runner.new do |node|
+        ChefSpec::ServerRunner.new do |node|
           if method.to_s.start_with?('https')
             node.set['hipache']['https'][method[6..-1].to_sym] = override
           elsif method.to_s.start_with?('http')

@@ -1,7 +1,6 @@
 ---
 driver:
   name: digitalocean
-  digitalocean_client_id: <%= ENV['DIGITALOCEAN_CLIENT_ID'] %>
-  digitalocean_api_key: <%= ENV['DIGITALOCEAN_API_KEY'] %>
-  ssh_key: <%= Hipache::Helpers.private_key_file %>
-  ssh_key_ids: <%= Hipache::Helpers.ssh_key_ids %>
+
+platforms:
+  - name: ubuntu-14-04-x64

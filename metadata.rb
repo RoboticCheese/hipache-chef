@@ -1,3 +1,6 @@
+# Encoding: UTF-8
+#
+# rubocop:disable SingleSpaceBeforeFirstArg
 name             'hipache'
 maintainer       'Jonathan Hartman'
 maintainer_email 'j@p4nt5.com'
@@ -9,3 +12,4 @@ version          '0.1.1'
 depends          'nodejs'
 
 supports         'ubuntu'
+# rubocop:enable SingleSpaceBeforeFirstArg
