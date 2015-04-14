@@ -1,6 +1,9 @@
 Hipache Cookbook CHANGELOG
 ==========================
 
+v?.?.? (????-??-??)
+-------------------
+
 v0.2.0 (2015-04-14)
 -------------------
 - Ship ChefSpec matchers with the cookbook
