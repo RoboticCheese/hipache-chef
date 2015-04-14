@@ -7,7 +7,7 @@ maintainer_email 'j@p4nt5.com'
 license          'Apache v2.0'
 description      'Installs/Configures hipache'
 long_description 'Installs/Configures hipache'
-version          '0.1.1'
+version          '0.2.0'
 
 depends          'nodejs'
 
