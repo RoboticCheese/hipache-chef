@@ -31,7 +31,7 @@ class Chef
       include ::Hipache::Helpers
 
       attr_accessor :created
-      alias_method :created?, :created
+      alias created? created
 
       def initialize(name, run_context = nil)
         super

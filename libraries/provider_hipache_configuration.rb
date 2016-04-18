@@ -69,7 +69,7 @@ class Chef
         config_dir.only_if do
           ::Dir.new(path).entries.delete_if do |i|
             %w(. ..).include?(i)
-          end.length == 0
+          end.empty?
         end
         config_dir.run_action(:delete)
         new_resource.created = false

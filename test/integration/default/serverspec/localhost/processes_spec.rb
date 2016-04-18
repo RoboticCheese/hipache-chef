@@ -2,7 +2,7 @@
 
 require_relative '../spec_helper'
 
-describe 'Hipache processes' do
+describe 'hipache::default::processes' do
   describe command('hipache --help') do
     it 'is executable' do
       expect(subject.stdout).to match(/usage: hipache \[options\]/)

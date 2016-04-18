@@ -7,7 +7,7 @@ describe Chef::Resource::HipacheConfiguration do
   let(:path) { nil }
   let(:config_hash) { nil }
 
-  options =  [
+  options = [
     :server_access_log,
     :server_workers,
     :server_max_sockets,

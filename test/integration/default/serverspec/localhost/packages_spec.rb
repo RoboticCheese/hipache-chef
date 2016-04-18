@@ -2,7 +2,7 @@
 
 require_relative '../spec_helper'
 
-describe 'Hipache packages' do
+describe 'hipache::default::packages' do
   describe package('nodejs') do
     it 'is installed' do
       expect(subject).to be_installed

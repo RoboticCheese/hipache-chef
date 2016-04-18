@@ -3,7 +3,8 @@
 require_relative '../spec_helper'
 
 describe 'hipache::default' do
-  let(:runner) { ChefSpec::ServerRunner.new }
+  let(:platform) { { platform: 'ubuntu', version: '14.04' } }
+  let(:runner) { ChefSpec::ServerRunner.new(platform) }
   let(:chef_run) { runner.converge(described_recipe) }
 
   it 'installs Node.js' do

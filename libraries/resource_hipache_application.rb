@@ -32,7 +32,7 @@ class Chef
       include ::Hipache::Helpers
 
       attr_accessor :installed
-      alias_method :installed?, :installed
+      alias installed? installed
 
       def initialize(name, run_context = nil)
         super
