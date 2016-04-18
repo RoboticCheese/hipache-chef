@@ -33,9 +33,9 @@ class Chef
       attr_accessor :created
       attr_accessor :enabled
       attr_accessor :running
-      alias_method :created?, :created
-      alias_method :enabled?, :enabled
-      alias_method :running?, :running
+      alias created? created
+      alias enabled? enabled
+      alias running? running
 
       def initialize(name, run_context = nil)
         super
@@ -45,8 +45,9 @@ class Chef
         @allowed_actions = [
           :create, :delete, :enable, :disable, :start, :stop
         ]
-
-        @created, @enabled, @running = false, false, false
+        @created = false
+        @enabled = false
+        @running = false
       end
 
       #

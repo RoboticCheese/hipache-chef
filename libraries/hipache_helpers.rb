@@ -109,7 +109,7 @@ module Hipache
         default: 'redis://127.0.0.1:6379',
         alt_name: :driver
       }
-    }
+    }.freeze
 
     #
     # Return the init system for use in this platform
@@ -122,7 +122,7 @@ module Hipache
       when 'ubuntu'
         :upstart
       else
-        fail(Exceptions::UnsupportedPlatform, :init_system)
+        raise(Exceptions::UnsupportedPlatform, :init_system)
       end
     end
 
@@ -144,7 +144,7 @@ module Hipache
     def valid_version?(arg)
       return false unless arg.is_a?(String) || arg.is_a?(Symbol)
       return true if arg.to_s == 'latest'
-      arg.match(/^[0-9]+\.[0-9]+\.[0-9]+$/) ? true : false
+      arg =~ /^[0-9]+\.[0-9]+\.[0-9]+$/ ? true : false
     end
   end
 

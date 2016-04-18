@@ -1,15 +1,16 @@
 # Encoding: UTF-8
-#
-# rubocop:disable SingleSpaceBeforeFirstArg
-name             'hipache'
-maintainer       'Jonathan Hartman'
+
+name 'hipache'
+maintainer 'Jonathan Hartman'
 maintainer_email 'j@p4nt5.com'
-license          'Apache v2.0'
-description      'Installs/Configures hipache'
+license 'Apache v2.0'
+description 'Installs/Configures hipache'
 long_description 'Installs/Configures hipache'
-version          '0.2.1'
+version '0.2.1'
 
-depends          'nodejs'
+source_url 'https://github.com/roboticcheese/hipache-chef'
+issues_url 'https://github.com/roboticcheese/hipache-chef/issues'
 
-supports         'ubuntu'
-# rubocop:enable SingleSpaceBeforeFirstArg
+depends 'nodejs'
+
+supports 'ubuntu'

@@ -2,4 +2,9 @@
 
 require 'serverspec'
 
-set :backend, :exec
+if RUBY_PLATFORM =~ /mswin|mingw32|windows/
+  set :os, family: 'windows'
+  set :backend, :cmd
+else
+  set :backend, :exec
+end
