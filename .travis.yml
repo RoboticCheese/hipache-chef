@@ -1,23 +1,20 @@
 language: ruby
 
+branches:
+  only:
+    - master
+
+sudo: required
 cache: bundler
-sudo: true
+services:
+  - docker
 
 install:
   - curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -P chefdk
-  - chef exec bundle install --without=development
+  - chef exec bundle install --without=development integration
 
 before_script:
-  # Pending ENV support in Kitchen's Rake tasks and not just the CLI
   - cp .kitchen.travis.yml .kitchen.local.yml
-  - echo -e $DIGITALOCEAN_SSH_KEY_BODY > ~/.ssh/id_rsa
 
 script:
-  - chef exec rake && chef exec rake kitchen:all
-
-after_script:
-  - chef exec kitchen destroy
-
-env:
-  global:
-    # - KITCHEN_LOCAL_YAML=.kitchen.travis.yml
+  - chef exec rake && chef exec kitchen test

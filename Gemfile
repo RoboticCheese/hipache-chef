@@ -21,8 +21,8 @@ group :test do
   gem 'coveralls'
   gem 'fauxhai'
   gem 'test-kitchen'
-  gem 'kitchen-digitalocean'
   gem 'kitchen-vagrant'
+  gem 'kitchen-docker'
 end
 
 group :integration do
